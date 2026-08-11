@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../l10n/app_translations.dart';
 
 import 'login_page.dart';
 import 'create_order_page.dart';
@@ -10,8 +13,107 @@ import 'profile_page.dart';
 import 'chat_page.dart';
 import 'marketplace_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String currentLanguage = 'ky';
+
+  final String adminEmail = 'miki@gmail.com';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    return AppTranslations.get(key, currentLanguage);
+  }
+
+  String homeText(String key) {
+    const texts = {
+      'ky': {
+        'serviceDescription':
+            'Кыргызстан менен Кореянын ортосундагы жеткирүү кызматы',
+        'chooseDirection': '📦 Жеткирүү багытын тандаңыз',
+        'services': '🛍️ Кызматтар',
+        'kgToKrSubtitle': 'Кыргызстандан Кореяга заказ жөнөтүү',
+        'krToKgSubtitle': 'Кореядан Кыргызстанга заказ жөнөтүү',
+        'myOrdersSubtitle': 'Бардык заказдарыңызды көрүү',
+        'marketplaceSubtitle': 'Товарларды сатып алуу жана сатуу',
+        'chatTitle': 'Админ менен чат',
+        'chatSubtitle': 'Суроолор боюнча биз менен байланышыңыз',
+        'profileSubtitle': 'Жеке маалыматтарды башкаруу',
+        'adminSubtitle': 'Заказдарды жана кардарларды башкаруу',
+        'logoutTooltip': 'Чыгуу',
+        'logout': 'Аккаунттан чыгуу',
+      },
+      'ru': {
+        'serviceDescription': 'Сервис доставки между Кыргызстаном и Кореей',
+        'chooseDirection': '📦 Выберите направление доставки',
+        'services': '🛍️ Сервисы',
+        'kgToKrSubtitle': 'Отправить заказ из Кыргызстана в Корею',
+        'krToKgSubtitle': 'Отправить заказ из Кореи в Кыргызстан',
+        'myOrdersSubtitle': 'Просмотреть все ваши заказы',
+        'marketplaceSubtitle': 'Покупка и продажа товаров',
+        'chatTitle': 'Чат с администратором',
+        'chatSubtitle': 'Свяжитесь с нами по вопросам',
+        'profileSubtitle': 'Управление личными данными',
+        'adminSubtitle': 'Управление заказами и клиентами',
+        'logoutTooltip': 'Выйти',
+        'logout': 'Выйти из аккаунта',
+      },
+      'en': {
+        'serviceDescription': 'Delivery service between Kyrgyzstan and Korea',
+        'chooseDirection': '📦 Choose delivery direction',
+        'services': '🛍️ Services',
+        'kgToKrSubtitle': 'Send an order from Kyrgyzstan to Korea',
+        'krToKgSubtitle': 'Send an order from Korea to Kyrgyzstan',
+        'myOrdersSubtitle': 'View all your orders',
+        'marketplaceSubtitle': 'Buy and sell products',
+        'chatTitle': 'Chat with admin',
+        'chatSubtitle': 'Contact us if you have any questions',
+        'profileSubtitle': 'Manage your personal information',
+        'adminSubtitle': 'Manage orders and customers',
+        'logoutTooltip': 'Log out',
+        'logout': 'Log out of account',
+      },
+      'ko': {
+        'serviceDescription': '키르기스스탄과 한국 간 배송 서비스',
+        'chooseDirection': '📦 배송 방향을 선택하세요',
+        'services': '🛍️ 서비스',
+        'kgToKrSubtitle': '키르기스스탄에서 한국으로 주문 보내기',
+        'krToKgSubtitle': '한국에서 키르기스스탄으로 주문 보내기',
+        'myOrdersSubtitle': '모든 주문 보기',
+        'marketplaceSubtitle': '상품 구매 및 판매',
+        'chatTitle': '관리자와 채팅',
+        'chatSubtitle': '문의사항이 있으면 연락해주세요',
+        'profileSubtitle': '개인정보 관리',
+        'adminSubtitle': '주문 및 고객 관리',
+        'logoutTooltip': '로그아웃',
+        'logout': '계정에서 로그아웃',
+      },
+    };
+
+    return texts[currentLanguage]?[key] ?? texts['ky']?[key] ?? key;
+  }
 
   Future<void> logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
@@ -36,15 +138,17 @@ class HomePage extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
+
         title: const Text(
           'KG ↔️ KOREA',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+
         actions: [
           IconButton(
             onPressed: () => logout(context),
             icon: const Icon(Icons.logout),
-            tooltip: 'Чыгуу',
+            tooltip: homeText('logoutTooltip'),
           ),
         ],
       ),
@@ -55,6 +159,7 @@ class HomePage extends StatelessWidget {
 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
               // 👋 Саламдашуу
               Container(
@@ -67,15 +172,18 @@ class HomePage extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
+
                   borderRadius: BorderRadius.circular(24),
                 ),
 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
                     const CircleAvatar(
                       radius: 30,
                       backgroundColor: Colors.white,
+
                       child: Icon(
                         Icons.local_shipping,
                         size: 32,
@@ -106,9 +214,9 @@ class HomePage extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    const Text(
-                      'Кыргызстан менен Кореянын ортосундагы жеткирүү кызматы',
-                      style: TextStyle(color: Colors.white, fontSize: 15),
+                    Text(
+                      homeText('serviceDescription'),
+                      style: const TextStyle(color: Colors.white, fontSize: 15),
                     ),
                   ],
                 ),
@@ -116,9 +224,12 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              const Text(
-                '📦 Жеткирүү багытын тандаңыз',
-                style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+              Text(
+                homeText('chooseDirection'),
+                style: const TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 15),
@@ -128,9 +239,10 @@ class HomePage extends StatelessWidget {
                 context: context,
                 flag: '🇰🇬',
                 secondFlag: '🇰🇷',
-                title: 'Кыргызстан → Корея',
-                subtitle: 'Кыргызстандан Кореяга заказ жөнөтүү',
+                title: t('kyrgyzstanKorea'),
+                subtitle: homeText('kgToKrSubtitle'),
                 color: const Color(0xFFE3F2FD),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -148,9 +260,10 @@ class HomePage extends StatelessWidget {
                 context: context,
                 flag: '🇰🇷',
                 secondFlag: '🇰🇬',
-                title: 'Корея → Кыргызстан',
-                subtitle: 'Кореядан Кыргызстанга заказ жөнөтүү',
+                title: t('koreaKyrgyzstan'),
+                subtitle: homeText('krToKgSubtitle'),
                 color: const Color(0xFFE8F5E9),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -163,9 +276,12 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              const Text(
-                '🛍️ Кызматтар',
-                style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+              Text(
+                homeText('services'),
+                style: const TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 15),
@@ -174,8 +290,9 @@ class HomePage extends StatelessWidget {
               _menuCard(
                 context: context,
                 icon: Icons.inventory_2,
-                title: 'Менин заказдарым',
-                subtitle: 'Бардык заказдарыңызды көрүү',
+                title: t('orders'),
+                subtitle: homeText('myOrdersSubtitle'),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -192,8 +309,9 @@ class HomePage extends StatelessWidget {
               _menuCard(
                 context: context,
                 icon: Icons.storefront,
-                title: 'Marketplace',
-                subtitle: 'Товарларды сатып алуу жана сатуу',
+                title: t('marketplace'),
+                subtitle: homeText('marketplaceSubtitle'),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -210,8 +328,9 @@ class HomePage extends StatelessWidget {
               _menuCard(
                 context: context,
                 icon: Icons.chat_bubble_outline,
-                title: 'Админ менен чат',
-                subtitle: 'Суроолор боюнча биз менен байланышыңыз',
+                title: homeText('chatTitle'),
+                subtitle: homeText('chatSubtitle'),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -226,8 +345,9 @@ class HomePage extends StatelessWidget {
               _menuCard(
                 context: context,
                 icon: Icons.person_outline,
-                title: 'Менин профилим',
-                subtitle: 'Жеке маалыматтарды башкаруу',
+                title: t('profile'),
+                subtitle: homeText('profileSubtitle'),
+
                 onTap: () {
                   Navigator.push(
                     context,
@@ -239,14 +359,15 @@ class HomePage extends StatelessWidget {
               ),
 
               // 👨‍💼 Admin
-              if (user?.email == 'miki@gmail.com') ...[
+              if (user?.email == adminEmail) ...[
                 const SizedBox(height: 12),
 
                 _menuCard(
                   context: context,
                   icon: Icons.admin_panel_settings,
-                  title: 'Admin Panel',
-                  subtitle: 'Заказдарды жана кардарларды башкаруу',
+                  title: t('adminPanel'),
+                  subtitle: homeText('adminSubtitle'),
+
                   onTap: () {
                     Navigator.push(
                       context,
@@ -267,10 +388,12 @@ class HomePage extends StatelessWidget {
 
                 child: OutlinedButton.icon(
                   onPressed: () => logout(context),
+
                   icon: const Icon(Icons.logout),
-                  label: const Text(
-                    'Аккаунттан чыгуу',
-                    style: TextStyle(fontSize: 16),
+
+                  label: Text(
+                    homeText('logout'),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
               ),
@@ -379,6 +502,7 @@ class HomePage extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
+
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
 
       child: InkWell(

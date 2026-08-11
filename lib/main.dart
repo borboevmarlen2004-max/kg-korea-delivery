@@ -3,15 +3,32 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'firebase_options.dart';
 import 'pages/login_page.dart';
 import 'pages/register_page.dart';
+import 'l10n/app_translations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
+String currentLanguage = 'ky';
+
+Future<void> loadLanguage() async {
+  final prefs = await SharedPreferences.getInstance();
+  currentLanguage = prefs.getString('language') ?? 'ky';
+}
+
+Future<void> saveLanguage(String language) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('language', language);
+  currentLanguage = language;
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await loadLanguage();
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
     badge: true,
