@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../l10n/app_translations.dart';
 
 import 'home_page.dart';
 import 'register_page.dart';
@@ -19,6 +22,89 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   bool hidePassword = true;
 
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    return AppTranslations.get(key, currentLanguage);
+  }
+
+  String loginText(String key) {
+    const texts = {
+      'ky': {
+        'loginDescription': 'Аккаунтуңузга кирип,\nзаказдарыңызды башкарыңыз',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': 'Паролуңузду жазыңыз',
+        'emailPasswordRequired': 'Email жана пароль толтуруңуз',
+        'wrongEmailPassword': 'Email же пароль туура эмес',
+        'invalidEmail': 'Email туура эмес жазылды',
+        'userDisabled': 'Бул аккаунт өчүрүлгөн',
+        'tooManyRequests':
+            'Көп жолу аракет кылынды. Бир аздан кийин кайра аракет кылыңыз',
+        'loginError': 'Кирүүдө ката кетти',
+        'unexpectedError': 'Күтүлбөгөн ката кетти',
+      },
+
+      'ru': {
+        'loginDescription': 'Войдите в аккаунт,\nчтобы управлять заказами',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': 'Введите пароль',
+        'emailPasswordRequired': 'Заполните Email и пароль',
+        'wrongEmailPassword': 'Неверный Email или пароль',
+        'invalidEmail': 'Неверно указан Email',
+        'userDisabled': 'Этот аккаунт отключён',
+        'tooManyRequests': 'Слишком много попыток. Попробуйте позже',
+        'loginError': 'Ошибка входа',
+        'unexpectedError': 'Произошла неожиданная ошибка',
+      },
+
+      'en': {
+        'loginDescription': 'Sign in to your account\nto manage your orders',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': 'Enter your password',
+        'emailPasswordRequired': 'Please enter your Email and password',
+        'wrongEmailPassword': 'Incorrect Email or password',
+        'invalidEmail': 'Invalid Email address',
+        'userDisabled': 'This account has been disabled',
+        'tooManyRequests': 'Too many attempts. Please try again later',
+        'loginError': 'Login error',
+        'unexpectedError': 'An unexpected error occurred',
+      },
+
+      'ko': {
+        'loginDescription': '계정에 로그인하여\n주문을 관리하세요',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': '비밀번호를 입력하세요',
+        'emailPasswordRequired': '이메일과 비밀번호를 입력하세요',
+        'wrongEmailPassword': '이메일 또는 비밀번호가 올바르지 않습니다',
+        'invalidEmail': '이메일 형식이 올바르지 않습니다',
+        'userDisabled': '이 계정은 비활성화되었습니다',
+        'tooManyRequests': '시도가 너무 많습니다. 잠시 후 다시 시도하세요',
+        'loginError': '로그인 오류',
+        'unexpectedError': '예기치 않은 오류가 발생했습니다',
+      },
+    };
+
+    return texts[currentLanguage]?[key] ?? texts['ky']?[key] ?? key;
+  }
+
   // =========================================================
   // 🔐 КИРҮҮ
   // =========================================================
@@ -29,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (email.isEmpty || password.isEmpty) {
       setState(() {
-        message = 'Email жана пароль толтуруңуз';
+        message = loginText('emailPasswordRequired');
       });
       return;
     }
@@ -49,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
@@ -60,24 +146,23 @@ class _LoginPageState extends State<LoginPage> {
         case 'invalid-credential':
         case 'wrong-password':
         case 'user-not-found':
-          errorMessage = 'Email же пароль туура эмес';
+          errorMessage = loginText('wrongEmailPassword');
           break;
 
         case 'invalid-email':
-          errorMessage = 'Email туура эмес жазылды';
+          errorMessage = loginText('invalidEmail');
           break;
 
         case 'user-disabled':
-          errorMessage = 'Бул аккаунт өчүрүлгөн';
+          errorMessage = loginText('userDisabled');
           break;
 
         case 'too-many-requests':
-          errorMessage =
-              'Көп жолу аракет кылынды. Бир аздан кийин кайра аракет кылыңыз';
+          errorMessage = loginText('tooManyRequests');
           break;
 
         default:
-          errorMessage = e.message ?? 'Кирүүдө ката кетти';
+          errorMessage = e.message ?? loginText('loginError');
       }
 
       setState(() {
@@ -87,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       setState(() {
-        message = 'Күтүлбөгөн ката кетти';
+        message = loginText('unexpectedError');
       });
     } finally {
       if (mounted) {
@@ -123,9 +208,10 @@ class _LoginPageState extends State<LoginPage> {
         foregroundColor: Colors.black87,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Кирүү',
-          style: TextStyle(fontWeight: FontWeight.bold),
+
+        title: Text(
+          t('login'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -162,18 +248,27 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 25),
 
-              const Text(
-                'Кош келиңиз! 👋',
+              Text(
+                t('welcome'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 8),
 
-              const Text(
-                'Аккаунтуңузга кирип,\nзаказдарыңызды башкарыңыз',
+              Text(
+                loginText('loginDescription'),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
+
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
               ),
 
               const SizedBox(height: 30),
@@ -187,8 +282,8 @@ class _LoginPageState extends State<LoginPage> {
                 textInputAction: TextInputAction.next,
 
                 decoration: InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'example@gmail.com',
+                  labelText: t('email'),
+                  hintText: loginText('emailHint'),
 
                   prefixIcon: const Icon(
                     Icons.email_outlined,
@@ -227,6 +322,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: passwordController,
                 obscureText: hidePassword,
                 textInputAction: TextInputAction.done,
+
                 onSubmitted: (_) {
                   if (!isLoading) {
                     login();
@@ -234,8 +330,8 @@ class _LoginPageState extends State<LoginPage> {
                 },
 
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
-                  hintText: 'Паролуңузду жазыңыз',
+                  labelText: t('password'),
+                  hintText: loginText('passwordHint'),
 
                   prefixIcon: const Icon(
                     Icons.lock_outline,
@@ -297,6 +393,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
+
                     children: [
                       const Icon(Icons.error_outline, color: Colors.red),
 
@@ -305,6 +402,7 @@ class _LoginPageState extends State<LoginPage> {
                       Expanded(
                         child: Text(
                           message,
+
                           style: const TextStyle(
                             color: Colors.red,
                             fontSize: 13,
@@ -343,21 +441,23 @@ class _LoginPageState extends State<LoginPage> {
                       ? const SizedBox(
                           width: 23,
                           height: 23,
+
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             color: Colors.white,
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.login),
 
-                            SizedBox(width: 8),
+                          children: [
+                            const Icon(Icons.login),
+
+                            const SizedBox(width: 8),
 
                             Text(
-                              'Кирүү',
-                              style: TextStyle(
+                              t('login'),
+                              style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -374,10 +474,11 @@ class _LoginPageState extends State<LoginPage> {
               // =================================================
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+
                 children: [
-                  const Text(
-                    'Аккаунт жокпу?',
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    t('noAccount'),
+                    style: const TextStyle(color: Colors.grey),
                   ),
 
                   TextButton(
@@ -392,9 +493,9 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
 
-                    child: const Text(
-                      'Катталуу',
-                      style: TextStyle(
+                    child: Text(
+                      t('register'),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1565C0),
                       ),

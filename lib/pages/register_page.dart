@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../l10n/app_translations.dart';
 
 import 'home_page.dart';
 
@@ -18,6 +21,102 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isLoading = false;
   bool hidePassword = true;
 
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    return AppTranslations.get(key, currentLanguage);
+  }
+
+  String registerText(String key) {
+    const texts = {
+      'ky': {
+        'newAccount': 'Жаңы аккаунт 📝',
+        'description':
+            'Аккаунт түзүп, Кыргызстан ↔ Корея\nкызматтарын колдонуңуз',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': 'Кеминде 6 белги',
+        'emailPasswordRequired': 'Email жана пароль толтуруңуз',
+        'passwordTooShort': 'Пароль кеминде 6 белгиден турушу керек',
+        'emailAlreadyExists': 'Бул Email менен аккаунт мурунтан бар',
+        'invalidEmail': 'Email туура эмес жазылды',
+        'weakPassword': 'Пароль өтө жөнөкөй',
+        'operationNotAllowed': 'Email аркылуу катталуу азыр жеткиликтүү эмес',
+        'registerError': 'Катталууда ката кетти',
+        'unexpectedError': 'Күтүлбөгөн ката кетти',
+        'alreadyAccount': 'Аккаунтыңыз барбы?',
+      },
+
+      'ru': {
+        'newAccount': 'Новый аккаунт 📝',
+        'description':
+            'Создайте аккаунт и пользуйтесь\nсервисами Кыргызстан ↔ Корея',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': 'Минимум 6 символов',
+        'emailPasswordRequired': 'Введите Email и пароль',
+        'passwordTooShort': 'Пароль должен содержать минимум 6 символов',
+        'emailAlreadyExists': 'Аккаунт с этим Email уже существует',
+        'invalidEmail': 'Неверно указан Email',
+        'weakPassword': 'Пароль слишком простой',
+        'operationNotAllowed': 'Регистрация через Email сейчас недоступна',
+        'registerError': 'Ошибка регистрации',
+        'unexpectedError': 'Произошла неожиданная ошибка',
+        'alreadyAccount': 'Уже есть аккаунт?',
+      },
+
+      'en': {
+        'newAccount': 'Create Account 📝',
+        'description': 'Create an account and use\nKyrgyzstan ↔ Korea services',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': 'At least 6 characters',
+        'emailPasswordRequired': 'Please enter your Email and password',
+        'passwordTooShort': 'Password must be at least 6 characters',
+        'emailAlreadyExists': 'An account with this Email already exists',
+        'invalidEmail': 'Invalid Email address',
+        'weakPassword': 'Password is too weak',
+        'operationNotAllowed': 'Email registration is currently unavailable',
+        'registerError': 'Registration error',
+        'unexpectedError': 'An unexpected error occurred',
+        'alreadyAccount': 'Already have an account?',
+      },
+
+      'ko': {
+        'newAccount': '새 계정 만들기 📝',
+        'description': '계정을 만들고\n키르기스스탄 ↔ 한국 서비스를 이용하세요',
+        'emailHint': 'example@gmail.com',
+        'passwordHint': '6자 이상 입력하세요',
+        'emailPasswordRequired': '이메일과 비밀번호를 입력하세요',
+        'passwordTooShort': '비밀번호는 6자 이상이어야 합니다',
+        'emailAlreadyExists': '이 이메일로 등록된 계정이 이미 있습니다',
+        'invalidEmail': '이메일 형식이 올바르지 않습니다',
+        'weakPassword': '비밀번호가 너무 간단합니다',
+        'operationNotAllowed': '현재 이메일 회원가입을 사용할 수 없습니다',
+        'registerError': '회원가입 오류',
+        'unexpectedError': '예기치 않은 오류가 발생했습니다',
+        'alreadyAccount': '이미 계정이 있으신가요?',
+      },
+    };
+
+    return texts[currentLanguage]?[key] ?? texts['ky']?[key] ?? key;
+  }
+
   // =========================================================
   // 📝 КАТТАЛУУ
   // =========================================================
@@ -28,14 +127,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (email.isEmpty || password.isEmpty) {
       setState(() {
-        message = 'Email жана пароль толтуруңуз';
+        message = registerText('emailPasswordRequired');
       });
       return;
     }
 
     if (password.length < 6) {
       setState(() {
-        message = 'Пароль кеминде 6 белгиден турушу керек';
+        message = registerText('passwordTooShort');
       });
       return;
     }
@@ -55,7 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
@@ -64,23 +163,23 @@ class _RegisterPageState extends State<RegisterPage> {
 
       switch (e.code) {
         case 'email-already-in-use':
-          errorMessage = 'Бул Email менен аккаунт мурунтан бар';
+          errorMessage = registerText('emailAlreadyExists');
           break;
 
         case 'invalid-email':
-          errorMessage = 'Email туура эмес жазылды';
+          errorMessage = registerText('invalidEmail');
           break;
 
         case 'weak-password':
-          errorMessage = 'Пароль өтө жөнөкөй';
+          errorMessage = registerText('weakPassword');
           break;
 
         case 'operation-not-allowed':
-          errorMessage = 'Email аркылуу катталуу азыр жеткиликтүү эмес';
+          errorMessage = registerText('operationNotAllowed');
           break;
 
         default:
-          errorMessage = e.message ?? 'Катталууда ката кетти';
+          errorMessage = e.message ?? registerText('registerError');
       }
 
       setState(() {
@@ -90,7 +189,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (!mounted) return;
 
       setState(() {
-        message = 'Күтүлбөгөн ката кетти';
+        message = registerText('unexpectedError');
       });
     } finally {
       if (mounted) {
@@ -127,9 +226,9 @@ class _RegisterPageState extends State<RegisterPage> {
         elevation: 0,
         centerTitle: true,
 
-        title: const Text(
-          'Катталуу',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t('register'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -166,21 +265,27 @@ class _RegisterPageState extends State<RegisterPage> {
 
               const SizedBox(height: 25),
 
-              const Text(
-                'Жаңы аккаунт 📝',
+              Text(
+                registerText('newAccount'),
                 textAlign: TextAlign.center,
 
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 8),
 
-              const Text(
-                'Аккаунт түзүп, Кыргызстан ↔ Корея\n'
-                'кызматтарын колдонуңуз',
+              Text(
+                registerText('description'),
                 textAlign: TextAlign.center,
 
-                style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
               ),
 
               const SizedBox(height: 30),
@@ -196,8 +301,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 textInputAction: TextInputAction.next,
 
                 decoration: InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'example@gmail.com',
+                  labelText: t('email'),
+                  hintText: registerText('emailHint'),
 
                   prefixIcon: const Icon(
                     Icons.email_outlined,
@@ -246,8 +351,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 },
 
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
-                  hintText: 'Кеминде 6 белги',
+                  labelText: t('password'),
+
+                  hintText: registerText('passwordHint'),
 
                   prefixIcon: const Icon(
                     Icons.lock_outline,
@@ -299,11 +405,14 @@ class _RegisterPageState extends State<RegisterPage> {
               if (message.isNotEmpty) ...[
                 Container(
                   width: double.infinity,
+
                   padding: const EdgeInsets.all(14),
 
                   decoration: BoxDecoration(
                     color: Colors.red.withOpacity(0.08),
+
                     borderRadius: BorderRadius.circular(14),
+
                     border: Border.all(color: Colors.red.withOpacity(0.15)),
                   ),
 
@@ -318,6 +427,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       Expanded(
                         child: Text(
                           message,
+
                           style: const TextStyle(
                             color: Colors.red,
                             fontSize: 13,
@@ -343,6 +453,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1565C0),
+
                     foregroundColor: Colors.white,
 
                     disabledBackgroundColor: Colors.grey.shade300,
@@ -358,22 +469,24 @@ class _RegisterPageState extends State<RegisterPage> {
                       ? const SizedBox(
                           width: 23,
                           height: 23,
+
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             color: Colors.white,
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
 
                           children: [
-                            Icon(Icons.person_add_outlined),
+                            const Icon(Icons.person_add_outlined),
 
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
 
                             Text(
-                              'Катталуу',
-                              style: TextStyle(
+                              t('register'),
+
+                              style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -392,9 +505,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
 
                 children: [
-                  const Text(
-                    'Аккаунтыңыз барбы?',
-                    style: TextStyle(color: Colors.grey),
+                  Text(
+                    registerText('alreadyAccount'),
+
+                    style: const TextStyle(color: Colors.grey),
                   ),
 
                   TextButton(
@@ -404,10 +518,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             Navigator.pop(context);
                           },
 
-                    child: const Text(
-                      'Кирүү',
-                      style: TextStyle(
+                    child: Text(
+                      t('login'),
+
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
+
                         color: Color(0xFF1565C0),
                       ),
                     ),
@@ -419,6 +535,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               const Text(
                 '🇰🇬 Кыргызстан  ↔  🇰🇷 Корея',
+
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ],
