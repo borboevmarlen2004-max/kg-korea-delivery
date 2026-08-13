@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'admin_chat_detail_page.dart';
 
@@ -11,6 +12,88 @@ class AdminChatPage extends StatefulWidget {
 }
 
 class _AdminChatPageState extends State<AdminChatPage> {
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  // =========================================================
+  // 🌍 TRANSLATIONS
+  // =========================================================
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'customerChats': {
+        'ky': '💬 Кардарлардын чаты',
+        'ru': '💬 Чат с клиентами',
+        'en': '💬 Customer Chats',
+        'ko': '💬 고객 채팅',
+      },
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+      'customers': {
+        'ky': 'Кардарлар',
+        'ru': 'Клиенты',
+        'en': 'Customers',
+        'ko': '고객',
+      },
+      'customersChat': {
+        'ky': 'кардар менен чат',
+        'ru': 'клиентов в чате',
+        'en': 'customers in chat',
+        'ko': '명의 고객과 채팅',
+      },
+      'active': {
+        'ky': 'Активдүү',
+        'ru': 'Активные',
+        'en': 'Active',
+        'ko': '활성',
+      },
+      'unknownCustomer': {
+        'ky': 'Белгисиз кардар',
+        'ru': 'Неизвестный клиент',
+        'en': 'Unknown customer',
+        'ko': '알 수 없는 고객',
+      },
+      'noMessage': {
+        'ky': 'Билдирүү жок',
+        'ru': 'Нет сообщения',
+        'en': 'No message',
+        'ko': '메시지 없음',
+      },
+      'noCustomers': {
+        'ky': 'Кардарлар жок',
+        'ru': 'Клиентов нет',
+        'en': 'No customers',
+        'ko': '고객이 없습니다',
+      },
+      'noCustomersDescription': {
+        'ky':
+            'Кардарлар билдирүү жөнөткөндө,\nалардын чаттары бул жерде көрүнөт.',
+        'ru': 'Когда клиенты отправят сообщение,\nих чаты появятся здесь.',
+        'en': 'When customers send messages,\ntheir chats will appear here.',
+        'ko': '고객이 메시지를 보내면\n여기에 채팅이 표시됩니다.',
+      },
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,9 +104,9 @@ class _AdminChatPageState extends State<AdminChatPage> {
         foregroundColor: Colors.black87,
         elevation: 0,
 
-        title: const Text(
-          '💬 Кардарлардын чаты',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t('customerChats'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -38,8 +121,9 @@ class _AdminChatPageState extends State<AdminChatPage> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
+
                 child: Text(
-                  'Ката: ${snapshot.error}',
+                  '${t('error')}: ${snapshot.error}',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -85,6 +169,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+
             children: [
               // =================================================
               // 📊 HEADER
@@ -92,6 +177,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
               Container(
                 width: double.infinity,
                 color: Colors.white,
+
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
 
                 child: Row(
@@ -117,10 +203,11 @@ class _AdminChatPageState extends State<AdminChatPage> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+
                         children: [
-                          const Text(
-                            'Кардарлар',
-                            style: TextStyle(
+                          Text(
+                            t('customers'),
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -129,7 +216,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
                           const SizedBox(height: 4),
 
                           Text(
-                            '${chats.length} кардар менен чат',
+                            '${chats.length} ${t('customersChat')}',
                             style: const TextStyle(
                               color: Colors.grey,
                               fontSize: 12,
@@ -152,6 +239,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+
                         children: [
                           Container(
                             width: 8,
@@ -165,9 +253,9 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
                           const SizedBox(width: 6),
 
-                          const Text(
-                            'Активдүү',
-                            style: TextStyle(
+                          Text(
+                            t('active'),
+                            style: const TextStyle(
                               color: Colors.green,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -197,7 +285,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
                     final uid = data['uid']?.toString() ?? '';
 
                     final email =
-                        data['email']?.toString() ?? 'Белгисиз кардар';
+                        data['email']?.toString() ?? t('unknownCustomer');
 
                     final message = data['message']?.toString() ?? '';
 
@@ -249,7 +337,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.035),
+            color: Colors.black.withValues(alpha: 0.035),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -278,7 +366,9 @@ class _AdminChatPageState extends State<AdminChatPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
 
               children: [
+                // =================================================
                 // 👤 AVATAR
+                // =================================================
                 Container(
                   width: 55,
                   height: 55,
@@ -286,6 +376,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFFE3F2FD),
                     shape: BoxShape.circle,
+
                     border: Border.all(color: const Color(0xFFBBDEFB)),
                   ),
 
@@ -298,7 +389,9 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
                 const SizedBox(width: 13),
 
+                // =================================================
                 // 📧 EMAIL + MESSAGE
+                // =================================================
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,6 +404,7 @@ class _AdminChatPageState extends State<AdminChatPage> {
                               email,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -346,9 +440,11 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
                           Expanded(
                             child: Text(
-                              message.isEmpty ? 'Билдирүү жок' : message,
+                              message.isEmpty ? t('noMessage') : message,
+
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
+
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey,
@@ -364,7 +460,9 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
                 const SizedBox(width: 8),
 
+                // =================================================
                 // ➡️
+                // =================================================
                 Container(
                   width: 32,
                   height: 32,
@@ -419,17 +517,22 @@ class _AdminChatPageState extends State<AdminChatPage> {
 
             const SizedBox(height: 20),
 
-            const Text(
-              'Кардарлар жок',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              t('noCustomers'),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
-              'Кардарлар билдирүү жөнөткөндө,\nалардын чаттары бул жерде көрүнөт.',
+            Text(
+              t('noCustomersDescription'),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 13,
+                height: 1.4,
+              ),
             ),
           ],
         ),
