@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_translations.dart';
 
 import 'login_page.dart';
 import 'order_details_page.dart';
@@ -15,6 +17,200 @@ class MyOrdersPage extends StatefulWidget {
 }
 
 class _MyOrdersPageState extends State<MyOrdersPage> {
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const values = <String, Map<String, String>>{
+      'orders': {
+        'ky': 'Менин заказдарым',
+        'ru': 'Мои заказы',
+        'en': 'My Orders',
+        'ko': '내 주문',
+      },
+      'status': {'ky': 'Статус', 'ru': 'Статус', 'en': 'Status', 'ko': '상태'},
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+      'all': {'ky': 'Баары', 'ru': 'Все', 'en': 'All', 'ko': '전체'},
+      'newOrder': {
+        'ky': 'Жаңы заказ',
+        'ru': 'Новый заказ',
+        'en': 'New order',
+        'ko': '새 주문',
+      },
+      'accepted': {
+        'ky': 'Кабыл алынды',
+        'ru': 'Принят',
+        'en': 'Accepted',
+        'ko': '접수됨',
+      },
+      'preparing': {
+        'ky': 'Даярдалууда',
+        'ru': 'Подготавливается',
+        'en': 'Preparing',
+        'ko': '준비 중',
+      },
+      'onWay': {
+        'ky': 'Жолдо',
+        'ru': 'В пути',
+        'en': 'On the way',
+        'ko': '배송 중',
+      },
+      'delivered': {
+        'ky': 'Жеткирилди',
+        'ru': 'Доставлен',
+        'en': 'Delivered',
+        'ko': '배송 완료',
+      },
+      'cancelled': {
+        'ky': 'Жокко чыгарылды',
+        'ru': 'Отменён',
+        'en': 'Cancelled',
+        'ko': '취소됨',
+      },
+      'cancelledOrder': {
+        'ky': 'Бул заказ жокко чыгарылган',
+        'ru': 'Этот заказ отменён',
+        'en': 'This order has been cancelled',
+        'ko': '이 주문은 취소되었습니다',
+      },
+      'orderProgress': {
+        'ky': 'Заказдын жүрүшү',
+        'ru': 'Ход заказа',
+        'en': 'Order progress',
+        'ko': '주문 진행 상황',
+      },
+      'yourProductsSold': {
+        'ky': 'Товарыңыз сатылды',
+        'ru': 'Ваш товар продан',
+        'en': 'Your product was sold',
+        'ko': '상품이 판매되었습니다',
+      },
+      'marketplacePurchase': {
+        'ky': 'Marketplace сатып алуу',
+        'ru': 'Покупка Marketplace',
+        'en': 'Marketplace purchase',
+        'ko': '마켓플레이스 구매',
+      },
+      'from': {'ky': 'Кайдан', 'ru': 'Откуда', 'en': 'From', 'ko': '출발지'},
+      'to': {'ky': 'Кайда', 'ru': 'Куда', 'en': 'To', 'ko': '도착지'},
+      'phone': {'ky': 'Телефон', 'ru': 'Телефон', 'en': 'Phone', 'ko': '전화번호'},
+      'product': {'ky': 'Товар', 'ru': 'Товар', 'en': 'Product', 'ko': '상품'},
+      'delivery': {
+        'ky': 'Жеткирүү',
+        'ru': 'Стоимость доставки',
+        'en': 'Delivery',
+        'ko': '배송비',
+      },
+      'total': {
+        'ky': 'Жалпы',
+        'ru': 'Общая сумма',
+        'en': 'Total',
+        'ko': '총 금액',
+      },
+      'notSpecified': {
+        'ky': 'Көрсөтүлгөн эмес',
+        'ru': 'Не указано',
+        'en': 'Not specified',
+        'ko': '표시되지 않음',
+      },
+      'dateNone': {
+        'ky': 'Дата жок',
+        'ru': 'Нет даты',
+        'en': 'No date',
+        'ko': '날짜 없음',
+      },
+      'created': {
+        'ky': 'Түзүлгөн',
+        'ru': 'Создан',
+        'en': 'Created',
+        'ko': '생성됨',
+      },
+      'adminStatus': {
+        'ky': 'Статусту башкаруу',
+        'ru': 'Управление статусом',
+        'en': 'Manage status',
+        'ko': '상태 관리',
+      },
+      'editOrder': {
+        'ky': 'Заказды түзөтүү',
+        'ru': 'Изменить заказ',
+        'en': 'Edit order',
+        'ko': '주문 수정',
+      },
+      'deleteOrderQuestion': {
+        'ky': 'Заказды өчүрүү?',
+        'ru': 'Удалить заказ?',
+        'en': 'Delete order?',
+        'ko': '주문을 삭제하시겠습니까?',
+      },
+      'deleteOrderConfirm': {
+        'ky': 'Бул заказ өчүрүлөт. Улантасызбы?',
+        'ru': 'Этот заказ будет удалён. Продолжить?',
+        'en': 'This order will be deleted. Continue?',
+        'ko': '이 주문이 삭제됩니다. 계속하시겠습니까?',
+      },
+      'no': {'ky': 'Жок', 'ru': 'Нет', 'en': 'No', 'ko': '아니요'},
+      'delete': {'ky': 'Өчүрүү', 'ru': 'Удалить', 'en': 'Delete', 'ko': '삭제'},
+      'deleteOrder': {
+        'ky': 'Заказды өчүрүү',
+        'ru': 'Удалить заказ',
+        'en': 'Delete order',
+        'ko': '주문 삭제',
+      },
+      'emptyOrders': {
+        'ky': 'Сизде азырынча заказ жок',
+        'ru': 'У вас пока нет заказов',
+        'en': 'You have no orders yet',
+        'ko': '아직 주문이 없습니다',
+      },
+      'emptyByStatus': {
+        'ky': ' боюнча заказ жок',
+        'ru': ' — заказов нет',
+        'en': ' — no orders',
+        'ko': ' — 주문 없음',
+      },
+      'ordersHere': {
+        'ky': 'Заказдарыңыз бул жерде көрсөтүлөт.',
+        'ru': 'Ваши заказы будут отображаться здесь.',
+        'en': 'Your orders will appear here.',
+        'ko': '주문 내역이 여기에 표시됩니다.',
+      },
+      'order': {'ky': 'Заказ', 'ru': 'Заказ', 'en': 'Order', 'ko': '주문'},
+    };
+
+    return values[key]?[currentLanguage] ??
+        AppTranslations.get(key, currentLanguage);
+  }
+
+  String statusText(String status) {
+    const map = <String, String>{
+      'Жаңы заказ': 'newOrder',
+      'Кабыл алынды': 'accepted',
+      'Даярдалууда': 'preparing',
+      'Жолдо': 'onWay',
+      'Жеткирилди': 'delivered',
+      'Жокко чыгарылды': 'cancelled',
+    };
+    return t(map[status] ?? status);
+  }
+
   String selectedStatus = 'Баары';
 
   final List<String> statusFilters = [
@@ -40,14 +236,14 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Статус өзгөртүлдү: $newStatus ✅')),
+        SnackBar(content: Text('${t('status')}: ${statusText(newStatus)} ✅')),
       );
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Статус өзгөртүүдө ката: $e')));
+      ).showSnackBar(SnackBar(content: Text('${t('status')}: $e')));
     }
   }
 
@@ -66,13 +262,13 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Заказ өчүрүлдү 🗑️')));
+      ).showSnackBar(SnackBar(content: Text('${t('deleteOrder')} 🗑️')));
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Өчүрүүдө ката: $e')));
+      ).showSnackBar(SnackBar(content: Text('${t('delete')}: $e')));
     }
   }
 
@@ -158,13 +354,13 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: Colors.red.withOpacity(0.18)),
         ),
-        child: const Row(
+        child: Row(
           children: [
             Icon(Icons.cancel_outlined, color: Colors.red),
             SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Бул заказ жокко чыгарылган',
+                t('cancelledOrder'),
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
@@ -187,12 +383,12 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.route_outlined, size: 19, color: Color(0xFF1565C0)),
               SizedBox(width: 7),
               Text(
-                'Заказдын жүрүшү',
+                t('orderProgress'),
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ],
@@ -265,7 +461,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
               return Expanded(
                 child: Text(
-                  item,
+                  statusText(item),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 8.5,
@@ -347,7 +543,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
           const SizedBox(width: 6),
 
           Text(
-            isSeller ? 'Товарыңыз сатылды' : 'Marketplace сатып алуу',
+            isSeller ? t('yourProductsSold') : t('marketplacePurchase'),
             style: const TextStyle(
               color: Color(0xFF1565C0),
               fontSize: 12,
@@ -374,7 +570,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
     final formattedDate = createdAt != null
         ? DateFormat('dd.MM.yyyy, HH:mm').format(createdAt.toDate())
-        : 'Дата жок';
+        : t('dateNone');
 
     final status = data['status'] ?? 'Жаңы заказ';
 
@@ -458,7 +654,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            data['product']?.toString() ?? 'Товар',
+                            data['product']?.toString() ?? t('product'),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -470,7 +666,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                           const SizedBox(height: 5),
 
                           Text(
-                            'Заказ № ${data['orderNumber'] ?? 'Жок'}',
+                            '${t('order')} № ${data['orderNumber'] ?? t('notSpecified')}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -505,7 +701,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                           const SizedBox(width: 4),
 
                           Text(
-                            status,
+                            statusText(status),
                             style: TextStyle(
                               color: statusColor,
                               fontSize: 9,
@@ -538,7 +734,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                 // =========================================
                 _infoRow(
                   icon: Icons.location_on_outlined,
-                  title: 'Кайдан',
+                  title: t('from'),
                   value: data['from']?.toString() ?? '',
                 ),
 
@@ -546,7 +742,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
                 _infoRow(
                   icon: Icons.location_searching,
-                  title: 'Кайда',
+                  title: t('to'),
                   value: data['to']?.toString() ?? '',
                 ),
 
@@ -554,7 +750,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
                 _infoRow(
                   icon: Icons.phone_outlined,
-                  title: 'Телефон',
+                  title: t('phone'),
                   value: data['phone']?.toString() ?? '',
                 ),
 
@@ -573,15 +769,15 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                   child: Column(
                     children: [
                       _priceRow(
-                        'Товар',
-                        '${data['price'] ?? 'Көрсөтүлгөн эмес'} сом',
+                        t('product'),
+                        '${data['price'] ?? t('notSpecified')} сом',
                       ),
 
                       const SizedBox(height: 7),
 
                       _priceRow(
-                        'Жеткирүү',
-                        '${data['deliveryFee'] ?? 'Көрсөтүлгөн эмес'} сом',
+                        t('delivery'),
+                        '${data['deliveryFee'] ?? t('notSpecified')} сом',
                       ),
 
                       Padding(
@@ -591,8 +787,8 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
                       Row(
                         children: [
-                          const Text(
-                            'Жалпы',
+                          Text(
+                            t('total'),
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -602,7 +798,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                           const Spacer(),
 
                           Text(
-                            '${data['totalPrice'] ?? 'Көрсөтүлгөн эмес'} сом',
+                            '${data['totalPrice'] ?? t('notSpecified')} сом',
                             style: const TextStyle(
                               fontSize: 19,
                               fontWeight: FontWeight.bold,
@@ -627,7 +823,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                     const SizedBox(width: 6),
 
                     Text(
-                      'Түзүлгөн: $formattedDate',
+                      '${t('created')}: $formattedDate',
                       style: const TextStyle(color: Colors.grey, fontSize: 11),
                     ),
                   ],
@@ -666,8 +862,8 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
                             const SizedBox(width: 7),
 
-                            const Text(
-                              'Статусту башкаруу',
+                            Text(
+                              t('adminStatus'),
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -691,30 +887,36 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                               value: status,
                               isExpanded: true,
 
-                              items: const [
+                              items: [
                                 DropdownMenuItem(
                                   value: 'Жаңы заказ',
-                                  child: Text('🟠 Жаңы заказ'),
+                                  child: Text('🟠 ${statusText('Жаңы заказ')}'),
                                 ),
                                 DropdownMenuItem(
                                   value: 'Кабыл алынды',
-                                  child: Text('🔵 Кабыл алынды'),
+                                  child: Text(
+                                    '🔵 ${statusText('Кабыл алынды')}',
+                                  ),
                                 ),
                                 DropdownMenuItem(
                                   value: 'Даярдалууда',
-                                  child: Text('🟡 Даярдалууда'),
+                                  child: Text(
+                                    '🟡 ${statusText('Даярдалууда')}',
+                                  ),
                                 ),
                                 DropdownMenuItem(
                                   value: 'Жолдо',
-                                  child: Text('🚚 Жолдо'),
+                                  child: Text('🚚 ${statusText('Жолдо')}'),
                                 ),
                                 DropdownMenuItem(
                                   value: 'Жеткирилди',
-                                  child: Text('🟢 Жеткирилди'),
+                                  child: Text('🟢 ${statusText('Жеткирилди')}'),
                                 ),
                                 DropdownMenuItem(
                                   value: 'Жокко чыгарылды',
-                                  child: Text('🔴 Жокко чыгарылды'),
+                                  child: Text(
+                                    '🔴 ${statusText('Жокко чыгарылды')}',
+                                  ),
                                 ),
                               ],
 
@@ -791,7 +993,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                       );
                     },
                     icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Заказды түзөтүү'),
+                    label: Text(t('editOrder')),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF1565C0),
                       side: const BorderSide(color: Color(0xFF1565C0)),
@@ -819,19 +1021,17 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            title: const Text(
-                              'Заказды өчүрүү?',
+                            title: Text(
+                              t('deleteOrderQuestion'),
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            content: const Text(
-                              'Бул заказ өчүрүлөт. Улантасызбы?',
-                            ),
+                            content: Text(t('deleteOrderConfirm')),
                             actions: [
                               TextButton(
                                 onPressed: () {
                                   Navigator.pop(context, false);
                                 },
-                                child: const Text('Жок'),
+                                child: Text(t('no')),
                               ),
                               ElevatedButton(
                                 onPressed: () {
@@ -841,7 +1041,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                   backgroundColor: Colors.red,
                                   foregroundColor: Colors.white,
                                 ),
-                                child: const Text('Өчүрүү'),
+                                child: Text(t('delete')),
                               ),
                             ],
                           );
@@ -853,7 +1053,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                       }
                     },
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Заказды өчүрүү'),
+                    label: Text(t('deleteOrder')),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
@@ -907,7 +1107,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
               const SizedBox(height: 2),
 
               Text(
-                value.isEmpty ? 'Көрсөтүлгөн эмес' : value,
+                value.isEmpty ? t('notSpecified') : value,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -960,7 +1160,10 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
-      child: Text('$emoji $status', style: const TextStyle(fontSize: 12)),
+      child: Text(
+        '$emoji ${statusText(status)}',
+        style: const TextStyle(fontSize: 12),
+      ),
     );
   }
 
@@ -997,16 +1200,16 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
             Text(
               selectedStatus == 'Баары'
-                  ? 'Сизде азырынча заказ жок'
-                  : '$selectedStatus боюнча заказ жок',
+                  ? t('emptyOrders')
+                  : '$selectedStatus${t('emptyByStatus')}',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
-              'Заказдарыңыз бул жерде көрсөтүлөт.',
+            Text(
+              t('ordersHere'),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
@@ -1076,7 +1279,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                   ? const Icon(Icons.check, size: 15, color: Colors.white)
                   : null,
 
-              label: Text(filter),
+              label: Text(filter == 'Баары' ? t('all') : statusText(filter)),
 
               selected: selected,
 
@@ -1117,7 +1320,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-    const adminEmail = 'miki@gmail.com';
+    const adminEmail = 'miki\@gmail.com';
 
     final isAdmin = user?.email == adminEmail;
 
@@ -1135,10 +1338,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
         foregroundColor: Colors.black87,
         elevation: 0,
 
-        title: const Text(
-          '📦 Менин заказдарым',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('📦 ${t('orders')}'),
       ),
 
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -1162,7 +1362,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  'Ката: ${buyerSnapshot.error}',
+                  '${t('error')}: ${buyerSnapshot.error}',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -1211,7 +1411,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Text(
-                      'Ката: ${sellerSnapshot.error}',
+                      '${t('error')}: ${sellerSnapshot.error}',
                       textAlign: TextAlign.center,
                     ),
                   ),
