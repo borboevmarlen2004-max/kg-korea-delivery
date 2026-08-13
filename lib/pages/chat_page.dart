@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -13,11 +14,87 @@ class _ChatPageState extends State<ChatPage> {
   final messageController = TextEditingController();
 
   bool isSending = false;
+  String currentLanguage = 'ky';
 
   @override
-  void dispose() {
-    messageController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  // =========================================================
+  // 🌍 TRANSLATIONS
+  // =========================================================
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'adminChat': {
+        'ky': 'Админ менен чат',
+        'ru': 'Чат с администратором',
+        'en': 'Chat with Admin',
+        'ko': '관리자와 채팅',
+      },
+      'support': {
+        'ky': '💬 Колдоо кызматы',
+        'ru': '💬 Служба поддержки',
+        'en': '💬 Support Service',
+        'ko': '💬 고객 지원',
+      },
+      'loginFirst': {
+        'ky': 'Адегенде аккаунтка кириңиз',
+        'ru': 'Сначала войдите в аккаунт',
+        'en': 'Please log in first',
+        'ko': '먼저 로그인해 주세요',
+      },
+      'info': {
+        'ky': 'Сурооңуз болсо, админге билдирүү жазыңыз.',
+        'ru': 'Если у вас есть вопрос, напишите администратору.',
+        'en': 'If you have a question, send a message to the admin.',
+        'ko': '문의사항이 있으면 관리자에게 메시지를 보내주세요.',
+      },
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+      'sendError': {
+        'ky': 'Билдирүү жөнөтүүдө ката',
+        'ru': 'Ошибка при отправке сообщения',
+        'en': 'Error sending message',
+        'ko': '메시지 전송 오류',
+      },
+      'emptyChat': {
+        'ky': 'Чат азырынча бош',
+        'ru': 'Чат пока пуст',
+        'en': 'Chat is empty',
+        'ko': '채팅이 비어 있습니다',
+      },
+      'firstMessage': {
+        'ky': 'Админге биринчи билдирүүңүздү жөнөтүңүз.',
+        'ru': 'Отправьте первое сообщение администратору.',
+        'en': 'Send your first message to the admin.',
+        'ko': '관리자에게 첫 번째 메시지를 보내주세요.',
+      },
+      'messageHint': {
+        'ky': 'Билдирүү жазыңыз...',
+        'ru': 'Напишите сообщение...',
+        'en': 'Write a message...',
+        'ko': '메시지를 입력하세요...',
+      },
+      'admin': {'ky': 'Админ', 'ru': 'Админ', 'en': 'Admin', 'ko': '관리자'},
+      'you': {'ky': 'Сен', 'ru': 'Вы', 'en': 'You', 'ko': '나'},
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
   }
 
   // =========================================================
@@ -64,7 +141,7 @@ class _ChatPageState extends State<ChatPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Билдирүү жөнөтүүдө ката: $e')));
+      ).showSnackBar(SnackBar(content: Text('${t('sendError')}: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -93,7 +170,6 @@ class _ChatPageState extends State<ChatPage> {
         final date = createdAt.toDate();
 
         final hour = date.hour.toString().padLeft(2, '0');
-
         final minute = date.minute.toString().padLeft(2, '0');
 
         time = '$hour:$minute';
@@ -114,47 +190,62 @@ class _ChatPageState extends State<ChatPage> {
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+
       child: Container(
         constraints: const BoxConstraints(maxWidth: 310),
+
         margin: EdgeInsets.only(
           left: isMe ? 55 : 8,
           right: isMe ? 8 : 55,
           bottom: 12,
         ),
+
         padding: const EdgeInsets.fromLTRB(15, 12, 15, 10),
+
         decoration: BoxDecoration(
           color: bubbleColor,
+
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
             bottomLeft: Radius.circular(isMe ? 20 : 5),
             bottomRight: Radius.circular(isMe ? 5 : 20),
           ),
+
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
           ],
         ),
+
         child: Column(
           crossAxisAlignment: alignment,
+
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
+
               children: [
                 Icon(
                   isAdmin ? Icons.admin_panel_settings : Icons.person,
+
                   size: 15,
+
                   color: isMe ? Colors.white70 : Colors.grey.shade600,
                 ),
+
                 const SizedBox(width: 5),
+
                 Text(
-                  isAdmin ? 'Админ' : 'Сен',
+                  isAdmin ? t('admin') : t('you'),
+
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
+
                     color: isMe ? Colors.white70 : Colors.grey.shade600,
                   ),
                 ),
@@ -165,6 +256,7 @@ class _ChatPageState extends State<ChatPage> {
 
             Text(
               message,
+
               style: TextStyle(fontSize: 16, height: 1.3, color: textColor),
             ),
 
@@ -172,8 +264,10 @@ class _ChatPageState extends State<ChatPage> {
 
             Text(
               time,
+
               style: TextStyle(
                 fontSize: 10,
+
                 color: isMe ? Colors.white70 : Colors.grey,
               ),
             ),
@@ -192,9 +286,7 @@ class _ChatPageState extends State<ChatPage> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Адегенде аккаунтка кириңиз')),
-      );
+      return Scaffold(body: Center(child: Text(t('loginFirst'))));
     }
 
     return Scaffold(
@@ -213,8 +305,8 @@ class _ChatPageState extends State<ChatPage> {
               width: 42,
               height: 42,
 
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE3F2FD),
                 shape: BoxShape.circle,
               ),
 
@@ -223,19 +315,25 @@ class _ChatPageState extends State<ChatPage> {
 
             const SizedBox(width: 11),
 
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
                 Text(
-                  'Админ менен чат',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  t('adminChat'),
+
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
 
                 Text(
-                  '💬 Колдоо кызматы',
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                  t('support'),
+
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ],
             ),
@@ -250,7 +348,9 @@ class _ChatPageState extends State<ChatPage> {
           // =================================================
           Container(
             width: double.infinity,
+
             margin: const EdgeInsets.fromLTRB(14, 14, 14, 5),
+
             padding: const EdgeInsets.all(13),
 
             decoration: BoxDecoration(
@@ -258,16 +358,24 @@ class _ChatPageState extends State<ChatPage> {
               borderRadius: BorderRadius.circular(16),
             ),
 
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.info_outline, color: Color(0xFF1565C0), size: 20),
+                const Icon(
+                  Icons.info_outline,
+                  color: Color(0xFF1565C0),
+                  size: 20,
+                ),
 
-                SizedBox(width: 9),
+                const SizedBox(width: 9),
 
                 Expanded(
                   child: Text(
-                    'Сурооңуз болсо, админге билдирүү жазыңыз.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF1565C0)),
+                    t('info'),
+
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF1565C0),
+                    ),
                   ),
                 ),
               ],
@@ -291,8 +399,9 @@ class _ChatPageState extends State<ChatPage> {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
+
                       child: Text(
-                        'Ката: ${snapshot.error}',
+                        '${t('error')}: ${snapshot.error}',
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -309,14 +418,17 @@ class _ChatPageState extends State<ChatPage> {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+
                       children: [
                         Container(
                           width: 90,
                           height: 90,
+
                           decoration: BoxDecoration(
                             color: const Color(0xFFE3F2FD),
                             borderRadius: BorderRadius.circular(28),
                           ),
+
                           child: const Icon(
                             Icons.chat_bubble_outline,
                             size: 48,
@@ -326,9 +438,10 @@ class _ChatPageState extends State<ChatPage> {
 
                         const SizedBox(height: 18),
 
-                        const Text(
-                          'Чат азырынча бош',
-                          style: TextStyle(
+                        Text(
+                          t('emptyChat'),
+
+                          style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.bold,
                           ),
@@ -336,10 +449,15 @@ class _ChatPageState extends State<ChatPage> {
 
                         const SizedBox(height: 7),
 
-                        const Text(
-                          'Админге биринчи билдирүүңүздү жөнөтүңүз.',
+                        Text(
+                          t('firstMessage'),
+
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
+
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -348,7 +466,9 @@ class _ChatPageState extends State<ChatPage> {
 
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(14, 15, 14, 15),
+
                   itemCount: docs.length,
+
                   itemBuilder: (context, index) {
                     final data = docs[index].data() as Map<String, dynamic>;
 
@@ -370,7 +490,7 @@ class _ChatPageState extends State<ChatPage> {
 
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 12,
                   offset: const Offset(0, -3),
                 ),
@@ -394,7 +514,7 @@ class _ChatPageState extends State<ChatPage> {
                       textInputAction: TextInputAction.newline,
 
                       decoration: InputDecoration(
-                        hintText: 'Билдирүү жазыңыз...',
+                        hintText: t('messageHint'),
 
                         hintStyle: const TextStyle(
                           color: Colors.grey,
@@ -422,6 +542,7 @@ class _ChatPageState extends State<ChatPage> {
 
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
+
                           borderSide: const BorderSide(
                             color: Color(0xFF1565C0),
                             width: 1.2,
@@ -458,6 +579,7 @@ class _ChatPageState extends State<ChatPage> {
                       child: isSending
                           ? const Padding(
                               padding: EdgeInsets.all(15),
+
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
