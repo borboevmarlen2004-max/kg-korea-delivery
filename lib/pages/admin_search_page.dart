@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'order_details_page.dart';
 
@@ -14,11 +15,200 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
   final TextEditingController searchController = TextEditingController();
 
   String searchText = '';
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
 
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  // =========================================================
+  // 🌍 TRANSLATIONS
+  // =========================================================
+
+  String t(String key) {
+    const values = <String, Map<String, String>>{
+      'searchOrder': {
+        'ky': '🔍 Заказ издөө',
+        'ru': '🔍 Поиск заказа',
+        'en': '🔍 Search order',
+        'ko': '🔍 주문 검색',
+      },
+      'findOrders': {
+        'ky': 'Заказдарды табуу',
+        'ru': 'Поиск заказов',
+        'en': 'Find orders',
+        'ko': '주문 찾기',
+      },
+      'searchDescription': {
+        'ky': 'Заказ №, телефон же Email аркылуу издеңиз',
+        'ru': 'Ищите по номеру заказа, телефону или Email',
+        'en': 'Search by order number, phone or Email',
+        'ko': '주문번호, 전화번호 또는 Email로 검색하세요',
+      },
+      'searchHint': {
+        'ky': 'Заказ №, телефон же Email...',
+        'ru': 'Номер заказа, телефон или Email...',
+        'en': 'Order number, phone or Email...',
+        'ko': '주문번호, 전화번호 또는 Email...',
+      },
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+      'ordersFound': {
+        'ky': 'заказ табылды',
+        'ru': 'заказов найдено',
+        'en': 'orders found',
+        'ko': '개의 주문을 찾았습니다',
+      },
+      'phone': {'ky': 'Телефон', 'ru': 'Телефон', 'en': 'Phone', 'ko': '전화번호'},
+      'email': {'ky': 'Email', 'ru': 'Email', 'en': 'Email', 'ko': 'Email'},
+      'direction': {
+        'ky': 'Багыт',
+        'ru': 'Направление',
+        'en': 'Direction',
+        'ko': '방향',
+      },
+      'total': {
+        'ky': 'Жалпы сумма',
+        'ru': 'Общая сумма',
+        'en': 'Total amount',
+        'ko': '총 금액',
+      },
+      'details': {
+        'ky': 'Толук маалымат',
+        'ru': 'Подробнее',
+        'en': 'Details',
+        'ko': '상세 정보',
+      },
+      'order': {'ky': 'Заказ', 'ru': 'Заказ', 'en': 'Order', 'ko': '주문'},
+      'productNotSpecified': {
+        'ky': 'Товар көрсөтүлгөн эмес',
+        'ru': 'Товар не указан',
+        'en': 'Product not specified',
+        'ko': '상품이 지정되지 않았습니다',
+      },
+      'phoneNotFound': {
+        'ky': 'Телефон жок',
+        'ru': 'Телефон отсутствует',
+        'en': 'Phone not found',
+        'ko': '전화번호 없음',
+      },
+      'emailNotFound': {
+        'ky': 'Email жок',
+        'ru': 'Email отсутствует',
+        'en': 'Email not found',
+        'ko': 'Email 없음',
+      },
+      'noOrders': {
+        'ky': 'Заказдар жок',
+        'ru': 'Заказов нет',
+        'en': 'No orders',
+        'ko': '주문이 없습니다',
+      },
+      'orderNotFound': {
+        'ky': 'Заказ табылган жок',
+        'ru': 'Заказ не найден',
+        'en': 'Order not found',
+        'ko': '주문을 찾을 수 없습니다',
+      },
+      'checkSearch': {
+        'ky': 'Издөө сөзүңүздү же маалыматты текшерип көрүңүз.',
+        'ru': 'Проверьте поисковый запрос или введённые данные.',
+        'en': 'Please check your search term or information.',
+        'ko': '검색어 또는 입력한 정보를 확인해 주세요.',
+      },
+      'noOrdersYet': {
+        'ky': 'Азырынча заказдар жок.',
+        'ru': 'Пока заказов нет.',
+        'en': 'There are no orders yet.',
+        'ko': '아직 주문이 없습니다.',
+      },
+      'newOrder': {
+        'ky': 'Жаңы заказ',
+        'ru': 'Новый заказ',
+        'en': 'New order',
+        'ko': '새 주문',
+      },
+      'accepted': {
+        'ky': 'Кабыл алынды',
+        'ru': 'Принят',
+        'en': 'Accepted',
+        'ko': '접수됨',
+      },
+      'preparing': {
+        'ky': 'Даярдалууда',
+        'ru': 'Подготавливается',
+        'en': 'Preparing',
+        'ko': '준비 중',
+      },
+      'onWay': {
+        'ky': 'Жолдо',
+        'ru': 'В пути',
+        'en': 'On the way',
+        'ko': '배송 중',
+      },
+      'delivered': {
+        'ky': 'Жеткирилди',
+        'ru': 'Доставлен',
+        'en': 'Delivered',
+        'ko': '배송 완료',
+      },
+      'cancelled': {
+        'ky': 'Жокко чыгарылды',
+        'ru': 'Отменён',
+        'en': 'Cancelled',
+        'ko': '취소됨',
+      },
+    };
+
+    return values[key]?[currentLanguage] ?? values[key]?['ky'] ?? key;
+  }
+
+  // =========================================================
+  // 🌍 TRANSLATE STATUS
+  // =========================================================
+
+  String translateStatus(String status) {
+    switch (status) {
+      case 'Жаңы заказ':
+        return t('newOrder');
+
+      case 'Кабыл алынды':
+        return t('accepted');
+
+      case 'Даярдалууда':
+        return t('preparing');
+
+      case 'Жолдо':
+        return t('onWay');
+
+      case 'Жеткирилди':
+        return t('delivered');
+
+      case 'Жокко чыгарылды':
+        return t('cancelled');
+
+      default:
+        return status;
+    }
   }
 
   // =========================================================
@@ -79,6 +269,57 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
     }
   }
 
+  // =========================================================
+  // 🔄 TRANSLATE DIRECTION
+  // =========================================================
+
+  String translateDirection(String direction) {
+    switch (direction) {
+      case 'Кыргызстан → Корея':
+        switch (currentLanguage) {
+          case 'ru':
+            return 'Кыргызстан → Корея';
+          case 'en':
+            return 'Kyrgyzstan → Korea';
+          case 'ko':
+            return '키르기스스탄 → 한국';
+          default:
+            return direction;
+        }
+
+      case 'Корея → Кыргызстан':
+        switch (currentLanguage) {
+          case 'ru':
+            return 'Корея → Кыргызстан';
+          case 'en':
+            return 'Korea → Kyrgyzstan';
+          case 'ko':
+            return '한국 → 키르기스스탄';
+          default:
+            return direction;
+        }
+
+      case 'Marketplace':
+        switch (currentLanguage) {
+          case 'ru':
+            return 'Marketplace';
+          case 'en':
+            return 'Marketplace';
+          case 'ko':
+            return '마켓플레이스';
+          default:
+            return direction;
+        }
+
+      default:
+        return direction;
+    }
+  }
+
+  // =========================================================
+  // 📱 BUILD
+  // =========================================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,10 +332,9 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
-
-        title: const Text(
-          '🔍 Заказ издөө',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t('searchOrder'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -106,32 +346,31 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
-                const Text(
-                  'Заказды табуу',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  t('findOrders'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 6),
 
-                const Text(
-                  'Заказ №, телефон же Email аркылуу издеңиз',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                Text(
+                  t('searchDescription'),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
 
                 const SizedBox(height: 14),
 
                 TextField(
                   controller: searchController,
-
                   textInputAction: TextInputAction.search,
-
                   decoration: InputDecoration(
-                    hintText: 'Заказ №, телефон же Email...',
+                    hintText: t('searchHint'),
 
                     hintStyle: const TextStyle(
                       color: Colors.grey,
@@ -214,7 +453,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Text(
-                        'Ката: ${snapshot.error}',
+                        '${t('error')}: ${snapshot.error}',
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -253,11 +492,9 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-
                       child: Row(
                         children: [
                           const Icon(
@@ -269,7 +506,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                           const SizedBox(width: 7),
 
                           Text(
-                            '${filteredOrders.length} заказ табылды',
+                            '${filteredOrders.length} ${t('ordersFound')}',
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -282,9 +519,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
-
                         itemCount: filteredOrders.length,
-
                         itemBuilder: (context, index) {
                           final order = filteredOrders[index];
 
@@ -313,13 +548,13 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
     String orderId,
     Map<String, dynamic> data,
   ) {
-    final orderNumber = data['orderNumber']?.toString() ?? 'Заказ';
+    final orderNumber = data['orderNumber']?.toString() ?? t('order');
 
-    final product = data['product']?.toString() ?? 'Товар көрсөтүлгөн эмес';
+    final product = data['product']?.toString() ?? t('productNotSpecified');
 
-    final phone = data['phone']?.toString() ?? 'Телефон жок';
+    final phone = data['phone']?.toString() ?? t('phoneNotFound');
 
-    final email = data['email']?.toString() ?? 'Email жок';
+    final email = data['email']?.toString() ?? t('emailNotFound');
 
     final status = data['status']?.toString() ?? 'Жаңы заказ';
 
@@ -335,12 +570,11 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
 
       decoration: BoxDecoration(
         color: Colors.white,
-
         borderRadius: BorderRadius.circular(22),
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -433,7 +667,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                       ),
 
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.10),
+                        color: statusColor.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(20),
                       ),
 
@@ -450,7 +684,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                           const SizedBox(width: 4),
 
                           Text(
-                            status,
+                            translateStatus(status),
                             style: TextStyle(
                               color: statusColor,
                               fontSize: 9,
@@ -472,16 +706,20 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                 // ==========================================
                 // 👤 USER INFO
                 // ==========================================
-                _infoRow(Icons.phone_outlined, 'Телефон', phone),
+                _infoRow(Icons.phone_outlined, t('phone'), phone),
 
                 const SizedBox(height: 9),
 
-                _infoRow(Icons.email_outlined, 'Email', email),
+                _infoRow(Icons.email_outlined, t('email'), email),
 
                 if (direction.isNotEmpty) ...[
                   const SizedBox(height: 9),
 
-                  _infoRow(Icons.swap_horiz, 'Багыт', direction),
+                  _infoRow(
+                    Icons.swap_horiz,
+                    t('direction'),
+                    translateDirection(direction),
+                  ),
                 ],
 
                 const SizedBox(height: 14),
@@ -491,6 +729,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
                 // ==========================================
                 Container(
                   width: double.infinity,
+
                   padding: const EdgeInsets.all(13),
 
                   decoration: BoxDecoration(
@@ -508,9 +747,12 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
 
                       const SizedBox(width: 8),
 
-                      const Text(
-                        'Жалпы сумма',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      Text(
+                        t('total'),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
                       ),
 
                       const Spacer(),
@@ -537,7 +779,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
 
                   children: [
                     Text(
-                      'Толук маалымат',
+                      t('details'),
                       style: const TextStyle(
                         color: Color(0xFF1565C0),
                         fontSize: 12,
@@ -626,8 +868,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
             const SizedBox(height: 20),
 
             Text(
-              hasSearch ? 'Заказ табылган жок' : 'Заказдар жок',
-
+              hasSearch ? t('orderNotFound') : t('noOrders'),
               textAlign: TextAlign.center,
 
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -636,10 +877,7 @@ class _AdminSearchPageState extends State<AdminSearchPage> {
             const SizedBox(height: 8),
 
             Text(
-              hasSearch
-                  ? 'Издөө сөзүңүздү же маалыматты текшерип көрүңүз.'
-                  : 'Азырынча заказдар жок.',
-
+              hasSearch ? t('checkSearch') : t('noOrdersYet'),
               textAlign: TextAlign.center,
 
               style: const TextStyle(color: Colors.grey, fontSize: 13),
