@@ -1,11 +1,207 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'admin_search_page.dart';
 import 'admin_chat_page.dart';
 
-class AdminPanelPage extends StatelessWidget {
+class AdminPanelPage extends StatefulWidget {
   const AdminPanelPage({super.key});
+
+  @override
+  State<AdminPanelPage> createState() => _AdminPanelPageState();
+}
+
+class _AdminPanelPageState extends State<AdminPanelPage> {
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const translations = {
+      // =========================================================
+      // HEADER
+      // =========================================================
+      'adminPanel': {
+        'ky': 'Башкаруу панели',
+        'ru': 'Панель управления',
+        'en': 'Admin Panel',
+        'ko': '관리자 패널',
+      },
+      'appName': {
+        'ky': 'KG ↔️ KOREA Delivery',
+        'ru': 'KG ↔️ KOREA Delivery',
+        'en': 'KG ↔️ KOREA Delivery',
+        'ko': 'KG ↔️ KOREA Delivery',
+      },
+
+      // =========================================================
+      // ERROR
+      // =========================================================
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+
+      // =========================================================
+      // STATISTICS
+      // =========================================================
+      'statistics': {
+        'ky': '📊 Заказдар статистикасы',
+        'ru': '📊 Статистика заказов',
+        'en': '📊 Order Statistics',
+        'ko': '📊 주문 통계',
+      },
+      'allOrders': {
+        'ky': 'Бардык заказдар',
+        'ru': 'Все заказы',
+        'en': 'All Orders',
+        'ko': '전체 주문',
+      },
+      'new': {'ky': 'Жаңы', 'ru': 'Новые', 'en': 'New', 'ko': '신규'},
+      'accepted': {
+        'ky': 'Кабыл алынды',
+        'ru': 'Приняты',
+        'en': 'Accepted',
+        'ko': '접수됨',
+      },
+      'preparing': {
+        'ky': 'Даярдалууда',
+        'ru': 'Готовятся',
+        'en': 'Preparing',
+        'ko': '준비 중',
+      },
+      'onWay': {
+        'ky': 'Жолдо',
+        'ru': 'В пути',
+        'en': 'On the way',
+        'ko': '배송 중',
+      },
+      'delivered': {
+        'ky': 'Жеткирилди',
+        'ru': 'Доставлены',
+        'en': 'Delivered',
+        'ko': '배송 완료',
+      },
+      'cancelled': {
+        'ky': 'Жокко чыгарылды',
+        'ru': 'Отменены',
+        'en': 'Cancelled',
+        'ko': '취소됨',
+      },
+
+      // =========================================================
+      // MANAGEMENT
+      // =========================================================
+      'management': {
+        'ky': '🛠️ Башкаруу',
+        'ru': '🛠️ Управление',
+        'en': '🛠️ Management',
+        'ko': '🛠️ 관리',
+      },
+      'searchOrder': {
+        'ky': 'Заказ издөө',
+        'ru': 'Поиск заказа',
+        'en': 'Search Order',
+        'ko': '주문 검색',
+      },
+      'searchOrderSubtitle': {
+        'ky': 'Заказ номерин же маалыматты издеңиз',
+        'ru': 'Найдите заказ по номеру или данным',
+        'en': 'Search by order number or information',
+        'ko': '주문 번호 또는 정보로 검색',
+      },
+      'customerChat': {
+        'ky': 'Кардарлардын чаты',
+        'ru': 'Чат с клиентами',
+        'en': 'Customer Chat',
+        'ko': '고객 채팅',
+      },
+      'customerChatSubtitle': {
+        'ky': 'Кардарлардын билдирүүлөрүн көрүү',
+        'ru': 'Просмотр сообщений клиентов',
+        'en': 'View customer messages',
+        'ko': '고객 메시지 보기',
+      },
+
+      // =========================================================
+      // INFO
+      // =========================================================
+      'info': {
+        'ky':
+            'Бул панель аркылуу заказдардын абалын көзөмөлдөп, кардарлар менен иштей аласыз.',
+        'ru':
+            'Через эту панель вы можете контролировать заказы и работать с клиентами.',
+        'en': 'Use this panel to monitor orders and work with customers.',
+        'ko': '이 패널에서 주문 상태를 확인하고 고객과 소통할 수 있습니다.',
+      },
+    };
+
+    final value = translations[key];
+
+    if (value == null) {
+      return key;
+    }
+
+    return value[currentLanguage] ?? value['ky'] ?? key;
+  }
+
+  String statusText(String status) {
+    const statusTranslations = {
+      'Жаңы заказ': {
+        'ky': 'Жаңы заказ',
+        'ru': 'Новый заказ',
+        'en': 'New order',
+        'ko': '새 주문',
+      },
+      'Кабыл алынды': {
+        'ky': 'Кабыл алынды',
+        'ru': 'Принят',
+        'en': 'Accepted',
+        'ko': '접수됨',
+      },
+      'Даярдалууда': {
+        'ky': 'Даярдалууда',
+        'ru': 'Готовится',
+        'en': 'Preparing',
+        'ko': '준비 중',
+      },
+      'Жолдо': {
+        'ky': 'Жолдо',
+        'ru': 'В пути',
+        'en': 'On the way',
+        'ko': '배송 중',
+      },
+      'Жеткирилди': {
+        'ky': 'Жеткирилди',
+        'ru': 'Доставлен',
+        'en': 'Delivered',
+        'ko': '배송 완료',
+      },
+      'Жокко чыгарылды': {
+        'ky': 'Жокко чыгарылды',
+        'ru': 'Отменён',
+        'en': 'Cancelled',
+        'ko': '취소됨',
+      },
+    };
+
+    return statusTranslations[status]?[currentLanguage] ??
+        statusTranslations[status]?['ky'] ??
+        status;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +212,9 @@ class AdminPanelPage extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
-        title: const Text(
-          '👨‍💼 Admin Panel',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          '👨‍💼 ${t('adminPanel')}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -38,7 +234,7 @@ class AdminPanelPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  'Ката: ${snapshot.error}',
+                  '${t('error')}: ${snapshot.error}',
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -131,24 +327,24 @@ class AdminPanelPage extends StatelessWidget {
 
                       const SizedBox(width: 15),
 
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Башкаруу панели',
-                              style: TextStyle(
+                              t('adminPanel'),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
 
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
 
                             Text(
-                              'KG ↔️ KOREA Delivery',
-                              style: TextStyle(
+                              t('appName'),
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 13,
                               ),
@@ -165,9 +361,12 @@ class AdminPanelPage extends StatelessWidget {
                 // ==========================================
                 // 📊 СТАТИСТИКА
                 // ==========================================
-                const Text(
-                  '📊 Заказдар статистикасы',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  t('statistics'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 14),
@@ -175,7 +374,7 @@ class AdminPanelPage extends StatelessWidget {
                 // Бардык заказдар
                 _buildMainStatCard(
                   icon: Icons.inventory_2_outlined,
-                  title: 'Бардык заказдар',
+                  title: t('allOrders'),
                   value: orders.length,
                   color: const Color(0xFF1565C0),
                 ),
@@ -188,7 +387,7 @@ class AdminPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.fiber_new,
-                        title: 'Жаңы',
+                        title: t('new'),
                         value: newOrders,
                         color: Colors.orange,
                       ),
@@ -199,7 +398,7 @@ class AdminPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.check_circle_outline,
-                        title: 'Кабыл алынды',
+                        title: t('accepted'),
                         value: accepted,
                         color: Colors.blue,
                       ),
@@ -214,7 +413,7 @@ class AdminPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.inventory_2_outlined,
-                        title: 'Даярдалууда',
+                        title: t('preparing'),
                         value: preparing,
                         color: Colors.amber.shade800,
                       ),
@@ -225,7 +424,7 @@ class AdminPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.local_shipping_outlined,
-                        title: 'Жолдо',
+                        title: t('onWay'),
                         value: onWay,
                         color: Colors.deepOrange,
                       ),
@@ -240,7 +439,7 @@ class AdminPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.done_all,
-                        title: 'Жеткирилди',
+                        title: t('delivered'),
                         value: delivered,
                         color: Colors.green,
                       ),
@@ -251,7 +450,7 @@ class AdminPanelPage extends StatelessWidget {
                     Expanded(
                       child: _buildStatCard(
                         icon: Icons.cancel_outlined,
-                        title: 'Жокко чыгарылды',
+                        title: t('cancelled'),
                         value: cancelled,
                         color: Colors.red,
                       ),
@@ -264,9 +463,12 @@ class AdminPanelPage extends StatelessWidget {
                 // ==========================================
                 // 🛠️ БАШКАРУУ
                 // ==========================================
-                const Text(
-                  '🛠️ Башкаруу',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  t('management'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 14),
@@ -275,8 +477,8 @@ class AdminPanelPage extends StatelessWidget {
                 _buildActionCard(
                   context: context,
                   icon: Icons.search,
-                  title: 'Заказ издөө',
-                  subtitle: 'Заказ номерин же маалыматты издеңиз',
+                  title: t('searchOrder'),
+                  subtitle: t('searchOrderSubtitle'),
                   color: const Color(0xFF1565C0),
                   onTap: () {
                     Navigator.push(
@@ -294,8 +496,8 @@ class AdminPanelPage extends StatelessWidget {
                 _buildActionCard(
                   context: context,
                   icon: Icons.chat_bubble_outline,
-                  title: 'Кардарлардын чаты',
-                  subtitle: 'Кардарлардын билдирүүлөрүн көрүү',
+                  title: t('customerChat'),
+                  subtitle: t('customerChatSubtitle'),
                   color: const Color(0xFF2E7D32),
                   onTap: () {
                     Navigator.push(
@@ -320,17 +522,17 @@ class AdminPanelPage extends StatelessWidget {
                     border: Border.all(color: Colors.grey.shade200),
                   ),
 
-                  child: const Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline, color: Color(0xFF1565C0)),
+                      const Icon(Icons.info_outline, color: Color(0xFF1565C0)),
 
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
 
                       Expanded(
                         child: Text(
-                          'Бул панель аркылуу заказдардын абалын көзөмөлдөп, кардарлар менен иштей аласыз.',
-                          style: TextStyle(
+                          t('info'),
+                          style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 12,
                             height: 1.4,
