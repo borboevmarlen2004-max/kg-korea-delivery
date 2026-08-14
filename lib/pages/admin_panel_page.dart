@@ -300,7 +300,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
 
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF1565C0).withOpacity(0.20),
+                        color: const Color(0xFF1565C0).withValues(alpha: 0.20),
                         blurRadius: 18,
                         offset: const Offset(0, 7),
                       ),
@@ -314,7 +314,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                         height: 58,
 
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
+                          color: Colors.white.withValues(alpha: 0.18),
                           shape: BoxShape.circle,
                         ),
 
@@ -570,7 +570,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.035),
+            color: Colors.black.withValues(alpha: 0.035),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -584,7 +584,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
             height: 55,
 
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
+              color: color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(16),
             ),
 
@@ -641,7 +641,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.035),
+            color: Colors.black.withValues(alpha: 0.035),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -656,7 +656,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
             height: 40,
 
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
+              color: color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
             ),
 
@@ -717,7 +717,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                 height: 52,
 
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.10),
+                  color: color.withValues(alpha: 0.10),
                   borderRadius: BorderRadius.circular(15),
                 ),
 
