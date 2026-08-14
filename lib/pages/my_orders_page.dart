@@ -350,9 +350,9 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.06),
+          color: Colors.red.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.red.withOpacity(0.18)),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.18)),
         ),
         child: Row(
           children: [
@@ -419,7 +419,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                         boxShadow: isCurrent
                             ? [
                                 BoxShadow(
-                                  color: color.withOpacity(0.30),
+                                  color: color.withValues(alpha: 0.30),
                                   blurRadius: 8,
                                 ),
                               ]
@@ -594,7 +594,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
         borderRadius: BorderRadius.circular(23),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.045),
+            color: Colors.black.withValues(alpha: 0.045),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -686,7 +686,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.10),
+                        color: statusColor.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -1156,7 +1156,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
       style: OutlinedButton.styleFrom(
         foregroundColor: color,
-        side: BorderSide(color: color.withOpacity(0.5)),
+        side: BorderSide(color: color.withValues(alpha: 0.5)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
@@ -1320,7 +1320,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-    const adminEmail = 'miki\@gmail.com';
+    const adminEmail = 'miki@gmail.com';
 
     final isAdmin = user?.email == adminEmail;
 
@@ -1389,7 +1389,6 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
           // 👤 USER
           // =================================================
 
-          final buyerOrders = buyerSnapshot.data?.docs ?? [];
 
           // =================================================
           // 🏪 SELLER ORDERS
