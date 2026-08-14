@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -22,6 +23,14 @@ class _AddProductPageState extends State<AddProductPage> {
   String? imageBase64;
   bool isSaving = false;
 
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
   @override
   void dispose() {
     titleController.dispose();
@@ -30,7 +39,182 @@ class _AddProductPageState extends State<AddProductPage> {
     super.dispose();
   }
 
-  // 📷 Сүрөт тандоо
+  // =========================================================
+  // 🌍 LANGUAGE
+  // =========================================================
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'addProduct': {
+        'ky': '➕ Товар кошуу',
+        'ru': '➕ Добавить товар',
+        'en': '➕ Add Product',
+        'ko': '➕ 상품 추가',
+      },
+
+      'productImage': {
+        'ky': 'Товар сүрөтү',
+        'ru': 'Фото товара',
+        'en': 'Product Image',
+        'ko': '상품 사진',
+      },
+
+      'changeImage': {
+        'ky': 'Сүрөттү өзгөртүү',
+        'ru': 'Изменить фото',
+        'en': 'Change photo',
+        'ko': '사진 변경',
+      },
+
+      'selectImage': {
+        'ky': 'Сүрөт тандоо',
+        'ru': 'Выбрать фото',
+        'en': 'Select photo',
+        'ko': '사진 선택',
+      },
+
+      'selectFromGallery': {
+        'ky': 'Галереядан сүрөт тандаңыз',
+        'ru': 'Выберите фото из галереи',
+        'en': 'Choose a photo from gallery',
+        'ko': '갤러리에서 사진을 선택하세요',
+      },
+
+      'productInfo': {
+        'ky': 'Товар маалыматы',
+        'ru': 'Информация о товаре',
+        'en': 'Product Information',
+        'ko': '상품 정보',
+      },
+
+      'productName': {
+        'ky': 'Товардын аты',
+        'ru': 'Название товара',
+        'en': 'Product name',
+        'ko': '상품명',
+      },
+
+      'productNameHint': {
+        'ky': 'Мисалы: iPhone 15',
+        'ru': 'Например: iPhone 15',
+        'en': 'Example: iPhone 15',
+        'ko': '예: iPhone 15',
+      },
+
+      'price': {
+        'ky': 'Баасы (сом)',
+        'ru': 'Цена (сом)',
+        'en': 'Price (som)',
+        'ko': '가격 (솜)',
+      },
+
+      'priceHint': {
+        'ky': 'Мисалы: 50000',
+        'ru': 'Например: 50000',
+        'en': 'Example: 50000',
+        'ko': '예: 50000',
+      },
+
+      'description': {
+        'ky': 'Сүрөттөмө',
+        'ru': 'Описание',
+        'en': 'Description',
+        'ko': '설명',
+      },
+
+      'descriptionHint': {
+        'ky': 'Товар тууралуу маалымат',
+        'ru': 'Информация о товаре',
+        'en': 'Information about the product',
+        'ko': '상품에 대한 정보',
+      },
+
+      'saveProduct': {
+        'ky': 'Товарды сактоо',
+        'ru': 'Сохранить товар',
+        'en': 'Save Product',
+        'ko': '상품 저장',
+      },
+
+      'saving': {
+        'ky': 'Сакталууда...',
+        'ru': 'Сохранение...',
+        'en': 'Saving...',
+        'ko': '저장 중...',
+      },
+
+      'marketplaceInfo': {
+        'ky': 'Товар Marketplace бөлүмүнө кошулат.',
+        'ru': 'Товар будет добавлен в раздел Marketplace.',
+        'en': 'The product will be added to the Marketplace.',
+        'ko': '상품이 Marketplace에 추가됩니다.',
+      },
+
+      'imageTooLarge': {
+        'ky': 'Сүрөт өтө чоң. Башка сүрөт тандаңыз 📷',
+        'ru': 'Фото слишком большое. Выберите другое фото 📷',
+        'en': 'Image is too large. Choose another photo 📷',
+        'ko': '사진이 너무 큽니다. 다른 사진을 선택하세요 📷',
+      },
+
+      'loginFirst': {
+        'ky': 'Адегенде аккаунтка кириңиз',
+        'ru': 'Сначала войдите в аккаунт',
+        'en': 'Please log in first',
+        'ko': '먼저 로그인해주세요',
+      },
+
+      'fillAllFields': {
+        'ky': 'Бардык талааларды толтуруңуз',
+        'ru': 'Заполните все поля',
+        'en': 'Fill in all fields',
+        'ko': '모든 항목을 입력해주세요',
+      },
+
+      'selectImageError': {
+        'ky': 'Сүрөт тандаңыз 📷',
+        'ru': 'Выберите фото 📷',
+        'en': 'Please select a photo 📷',
+        'ko': '사진을 선택해주세요 📷',
+      },
+
+      'invalidPrice': {
+        'ky': 'Бааны туура жазыңыз',
+        'ru': 'Введите правильную цену',
+        'en': 'Enter a valid price',
+        'ko': '올바른 가격을 입력해주세요',
+      },
+
+      'productSaved': {
+        'ky': 'Товар ийгиликтүү сакталды! 🎉',
+        'ru': 'Товар успешно сохранён! 🎉',
+        'en': 'Product saved successfully! 🎉',
+        'ko': '상품이 성공적으로 저장되었습니다! 🎉',
+      },
+
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
+  }
+
+  // =========================================================
+  // 📷 СҮРӨТ ТАНДОО
+  // =========================================================
+
   Future<void> pickImage() async {
     final picker = ImagePicker();
 
@@ -50,9 +234,9 @@ class _AddProductPageState extends State<AddProductPage> {
     if (bytes.length > 700000) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Сүрөт өтө чоң. Башка сүрөт тандаңыз 📷')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('imageTooLarge'))));
 
       return;
     }
@@ -63,14 +247,17 @@ class _AddProductPageState extends State<AddProductPage> {
     });
   }
 
-  // 💾 Товарды сактоо
+  // =========================================================
+  // 💾 ТОВАРДЫ САКТОО
+  // =========================================================
+
   Future<void> saveProduct() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Адегенде аккаунтка кириңиз')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('loginFirst'))));
 
       return;
     }
@@ -80,9 +267,9 @@ class _AddProductPageState extends State<AddProductPage> {
     final description = descriptionController.text.trim();
 
     if (title.isEmpty || priceText.isEmpty || description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Бардык талааларды толтуруңуз')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('fillAllFields'))));
 
       return;
     }
@@ -90,7 +277,7 @@ class _AddProductPageState extends State<AddProductPage> {
     if (imageBase64 == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Сүрөт тандаңыз 📷')));
+      ).showSnackBar(SnackBar(content: Text(t('selectImageError'))));
 
       return;
     }
@@ -100,7 +287,7 @@ class _AddProductPageState extends State<AddProductPage> {
     if (price == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Бааны туура жазыңыз')));
+      ).showSnackBar(SnackBar(content: Text(t('invalidPrice'))));
 
       return;
     }
@@ -130,9 +317,9 @@ class _AddProductPageState extends State<AddProductPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Товар ийгиликтүү сакталды! 🎉')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('productSaved'))));
 
       Navigator.pop(context);
     } catch (e) {
@@ -140,7 +327,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ката: $e')));
+      ).showSnackBar(SnackBar(content: Text('${t('error')}: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -149,6 +336,10 @@ class _AddProductPageState extends State<AddProductPage> {
       }
     }
   }
+
+  // =========================================================
+  // 🏠 BUILD
+  // =========================================================
 
   @override
   Widget build(BuildContext context) {
@@ -160,9 +351,9 @@ class _AddProductPageState extends State<AddProductPage> {
         foregroundColor: Colors.black87,
         elevation: 0,
 
-        title: const Text(
-          '➕ Товар кошуу',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t('addProduct'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -173,10 +364,12 @@ class _AddProductPageState extends State<AddProductPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
 
           children: [
+            // =================================================
             // 📸 СҮРӨТ
-            const Text(
-              'Товар сүрөтү',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            // =================================================
+            Text(
+              t('productImage'),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
@@ -194,7 +387,7 @@ class _AddProductPageState extends State<AddProductPage> {
 
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -226,22 +419,25 @@ class _AddProductPageState extends State<AddProductPage> {
                               ),
 
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.65),
+                                color: Colors.black.withValues(alpha: 0.65),
                                 borderRadius: BorderRadius.circular(14),
                               ),
 
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
+
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.camera_alt_outlined,
                                     color: Colors.white,
                                     size: 19,
                                   ),
-                                  SizedBox(width: 6),
+
+                                  const SizedBox(width: 6),
+
                                   Text(
-                                    'Сүрөттү өзгөртүү',
-                                    style: TextStyle(
+                                    t('changeImage'),
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -257,10 +453,12 @@ class _AddProductPageState extends State<AddProductPage> {
 
             const SizedBox(height: 25),
 
+            // =================================================
             // 📝 МААЛЫМАТ
-            const Text(
-              'Товар маалыматы',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            // =================================================
+            Text(
+              t('productInfo'),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
@@ -280,8 +478,8 @@ class _AddProductPageState extends State<AddProductPage> {
                   // 🏷️ Аты
                   _buildTextField(
                     controller: titleController,
-                    label: 'Товардын аты',
-                    hint: 'Мисалы: iPhone 15',
+                    label: t('productName'),
+                    hint: t('productNameHint'),
                     icon: Icons.shopping_bag_outlined,
                   ),
 
@@ -290,8 +488,8 @@ class _AddProductPageState extends State<AddProductPage> {
                   // 💰 Баасы
                   _buildTextField(
                     controller: priceController,
-                    label: 'Баасы (сом)',
-                    hint: 'Мисалы: 50000',
+                    label: t('price'),
+                    hint: t('priceHint'),
                     icon: Icons.payments_outlined,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
@@ -303,8 +501,8 @@ class _AddProductPageState extends State<AddProductPage> {
                   // 📄 Сүрөттөмө
                   _buildTextField(
                     controller: descriptionController,
-                    label: 'Сүрөттөмө',
-                    hint: 'Товар тууралуу маалымат',
+                    label: t('description'),
+                    hint: t('descriptionHint'),
                     icon: Icons.description_outlined,
                     maxLines: 5,
                   ),
@@ -314,7 +512,9 @@ class _AddProductPageState extends State<AddProductPage> {
 
             const SizedBox(height: 25),
 
+            // =================================================
             // 💾 САКТОО
+            // =================================================
             SizedBox(
               width: double.infinity,
               height: 58,
@@ -338,6 +538,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     ? const SizedBox(
                         width: 21,
                         height: 21,
+
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
@@ -346,7 +547,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     : const Icon(Icons.save_outlined),
 
                 label: Text(
-                  isSaving ? 'Сакталууда...' : 'Товарды сактоо',
+                  isSaving ? t('saving') : t('saveProduct'),
 
                   style: const TextStyle(
                     fontSize: 17,
@@ -358,11 +559,12 @@ class _AddProductPageState extends State<AddProductPage> {
 
             const SizedBox(height: 12),
 
-            const Center(
+            Center(
               child: Text(
-                'Товар Marketplace бөлүмүнө кошулат.',
+                t('marketplaceInfo'),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ),
           ],
@@ -371,30 +573,37 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // 📸 Сүрөт тандоо
+  // =========================================================
+  // 📸 СҮРӨТ PLACEHOLDER
+  // =========================================================
+
   Widget _imagePlaceholder() {
     return Container(
       color: const Color(0xFFEFF2F5),
 
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-            Icon(Icons.add_a_photo_outlined, size: 60, color: Colors.grey),
-
-            SizedBox(height: 12),
-
-            Text(
-              'Сүрөт тандоо',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            const Icon(
+              Icons.add_a_photo_outlined,
+              size: 60,
+              color: Colors.grey,
             ),
 
-            SizedBox(height: 5),
+            const SizedBox(height: 12),
 
             Text(
-              'Галереядан сүрөт тандаңыз',
-              style: TextStyle(color: Colors.grey, fontSize: 13),
+              t('selectImage'),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
+
+            const SizedBox(height: 5),
+
+            Text(
+              t('selectFromGallery'),
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
             ),
           ],
         ),
@@ -402,7 +611,10 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 
-  // ✏️ Кооз TextField
+  // =========================================================
+  // ✏️ TEXT FIELD
+  // =========================================================
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -423,6 +635,7 @@ class _AddProductPageState extends State<AddProductPage> {
         prefixIcon: Icon(icon, color: const Color(0xFF1565C0)),
 
         filled: true,
+
         fillColor: const Color(0xFFF5F7FA),
 
         border: OutlineInputBorder(
