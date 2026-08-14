@@ -45,6 +45,80 @@ class _ProfilePageState extends State<ProfilePage> {
     Navigator.pop(context);
   }
 
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'profileTitle': {
+        'ky': '👤 Менин профилим',
+        'ru': '👤 Мой профиль',
+        'en': '👤 My Profile',
+        'ko': '👤 내 프로필',
+      },
+      'editProfile': {
+        'ky': 'Профилди өзгөртүү',
+        'ru': 'Изменить профиль',
+        'en': 'Edit Profile',
+        'ko': '프로필 수정',
+      },
+      'language': {'ky': 'Тил', 'ru': 'Язык', 'en': 'Language', 'ko': '언어'},
+      'accountInfo': {
+        'ky': 'Аккаунт маалыматы',
+        'ru': 'Информация об аккаунте',
+        'en': 'Account Information',
+        'ko': '계정 정보',
+      },
+      'name': {'ky': 'Аты', 'ru': 'Имя', 'en': 'Name', 'ko': '이름'},
+      'email': {'ky': 'Email', 'ru': 'Email', 'en': 'Email', 'ko': '이메일'},
+      'uid': {'ky': 'UID', 'ru': 'UID', 'en': 'UID', 'ko': 'UID'},
+      'notSpecified': {
+        'ky': 'Көрсөтүлгөн эмес',
+        'ru': 'Не указано',
+        'en': 'Not specified',
+        'ko': '지정되지 않음',
+      },
+      'unknown': {
+        'ky': 'Белгисиз',
+        'ru': 'Неизвестно',
+        'en': 'Unknown',
+        'ko': '알 수 없음',
+      },
+      'logout': {
+        'ky': 'Аккаунттан чыгуу',
+        'ru': 'Выйти из аккаунта',
+        'en': 'Log out',
+        'ko': '로그아웃',
+      },
+      'chooseLanguage': {
+        'ky': 'Тилди тандоо',
+        'ru': 'Выберите язык',
+        'en': 'Choose Language',
+        'ko': '언어 선택',
+      },
+      'kyrgyz': {
+        'ky': 'Кыргызча',
+        'ru': 'Кыргызча',
+        'en': 'Kyrgyz',
+        'ko': '키르기스어',
+      },
+      'russian': {
+        'ky': 'Русский',
+        'ru': 'Русский',
+        'en': 'Russian',
+        'ko': '러시아어',
+      },
+      'english': {
+        'ky': 'English',
+        'ru': 'English',
+        'en': 'English',
+        'ko': '영어',
+      },
+      'korean': {'ky': '한국어', 'ru': '한국어', 'en': 'Korean', 'ko': '한국어'},
+    };
+
+    return translations[key]?[selectedLanguage] ??
+        translations[key]?['ky'] ??
+        key;
+  }
+
   String _languageName() {
     switch (selectedLanguage) {
       case 'ru':
@@ -97,9 +171,12 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Тилди тандоо',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  t('chooseLanguage'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 15),
@@ -107,28 +184,28 @@ class _ProfilePageState extends State<ProfilePage> {
                 _languageTile(
                   context: sheetContext,
                   flag: '🇰🇬',
-                  name: 'Кыргызча',
+                  name: t('kyrgyz'),
                   code: 'ky',
                 ),
 
                 _languageTile(
                   context: sheetContext,
                   flag: '🇷🇺',
-                  name: 'Русский',
+                  name: t('russian'),
                   code: 'ru',
                 ),
 
                 _languageTile(
                   context: sheetContext,
                   flag: '🇬🇧',
-                  name: 'English',
+                  name: t('english'),
                   code: 'en',
                 ),
 
                 _languageTile(
                   context: sheetContext,
                   flag: '🇰🇷',
-                  name: '한국어',
+                  name: t('korean'),
                   code: 'ko',
                 ),
               ],
@@ -167,9 +244,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final name = user?.displayName?.trim().isNotEmpty == true
         ? user!.displayName!
-        : 'Аты көрсөтүлгөн эмес';
+        : t('notSpecified');
 
-    final email = user?.email ?? 'Белгисиз';
+    final email = user?.email ?? t('unknown');
     final uid = user?.uid ?? '';
 
     return Scaffold(
@@ -179,9 +256,9 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
-        title: const Text(
-          '👤 Менин профилим',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t('profileTitle'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -190,7 +267,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
         child: Column(
           children: [
+            // =================================================
             // 👤 ПРОФИЛЬ HEADER
+            // =================================================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -201,7 +280,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -297,9 +376,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       icon: const Icon(Icons.edit_outlined),
 
-                      label: const Text(
-                        'Профилди өзгөртүү',
-                        style: TextStyle(
+                      label: Text(
+                        t('editProfile'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -312,7 +391,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 20),
 
+            // =================================================
             // 🌍 ТИЛ
+            // =================================================
             Material(
               color: Colors.white,
               borderRadius: BorderRadius.circular(22),
@@ -339,9 +420,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
 
-                title: const Text(
-                  'Тил',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                title: Text(
+                  t('language'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 subtitle: Text(
@@ -357,13 +441,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 20),
 
+            // =================================================
             // 📋 АККАУНТ МААЛЫМАТЫ
-            const Align(
+            // =================================================
+            Align(
               alignment: Alignment.centerLeft,
 
               child: Text(
-                'Аккаунт маалыматы',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                t('accountInfo'),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 
@@ -381,7 +470,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   _infoTile(
                     icon: Icons.person_outline,
-                    title: 'Аты',
+                    title: t('name'),
                     value: name,
                   ),
 
@@ -389,7 +478,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   _infoTile(
                     icon: Icons.email_outlined,
-                    title: 'Email',
+                    title: t('email'),
                     value: email,
                   ),
 
@@ -397,7 +486,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   _infoTile(
                     icon: Icons.badge_outlined,
-                    title: 'UID',
+                    title: t('uid'),
                     value: uid,
                     isUid: true,
                   ),
@@ -407,7 +496,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 25),
 
+            // =================================================
             // 🚪 ЧЫГУУ
+            // =================================================
             SizedBox(
               width: double.infinity,
               height: 55,
@@ -427,9 +518,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
                 icon: const Icon(Icons.logout),
 
-                label: const Text(
-                  'Аккаунттан чыгуу',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                label: Text(
+                  t('logout'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -446,7 +540,10 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // =========================================================
   // 📋 МААЛЫМАТ КАРТОЧКАСЫ
+  // =========================================================
+
   Widget _infoTile({
     required IconData icon,
     required String title,
@@ -487,7 +584,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 4),
 
                 Text(
-                  value.isEmpty ? 'Көрсөтүлгөн эмес' : value,
+                  value.isEmpty ? t('notSpecified') : value,
 
                   maxLines: isUid ? 2 : 3,
 
