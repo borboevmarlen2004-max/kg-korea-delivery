@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_product_page.dart';
 import 'product_detail_page.dart';
@@ -17,6 +18,104 @@ class _MarketplacePageState extends State<MarketplacePage> {
   final searchController = TextEditingController();
 
   String searchText = '';
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'marketplace': {
+        'ky': '🛍️ Marketplace',
+        'ru': '🛍️ Marketplace',
+        'en': '🛍️ Marketplace',
+        'ko': '🛍️ Marketplace',
+      },
+
+      'searchProduct': {
+        'ky': 'Товар издөө...',
+        'ru': 'Поиск товара...',
+        'en': 'Search product...',
+        'ko': '상품 검색...',
+      },
+
+      'addProduct': {
+        'ky': 'Товар кошуу',
+        'ru': 'Добавить товар',
+        'en': 'Add Product',
+        'ko': '상품 추가',
+      },
+
+      'noProducts': {
+        'ky': 'Азырынча товарлар жок',
+        'ru': 'Пока нет товаров',
+        'en': 'No products yet',
+        'ko': '아직 상품이 없습니다',
+      },
+
+      'noProductFound': {
+        'ky': 'Товар табылган жок',
+        'ru': 'Товар не найден',
+        'en': 'Product not found',
+        'ko': '상품을 찾을 수 없습니다',
+      },
+
+      'addFirstProduct': {
+        'ky': 'Биринчи болуп товар кошуңуз',
+        'ru': 'Добавьте первый товар',
+        'en': 'Add the first product',
+        'ko': '첫 번째 상품을 추가해보세요',
+      },
+
+      'tryAnotherSearch': {
+        'ky': 'Башка сөз менен кайра издеп көрүңүз',
+        'ru': 'Попробуйте поискать по-другому',
+        'en': 'Try searching with another word',
+        'ko': '다른 단어로 다시 검색해보세요',
+      },
+
+      'selling': {
+        'ky': 'Сатууда',
+        'ru': 'В продаже',
+        'en': 'For sale',
+        'ko': '판매 중',
+      },
+
+      'seller': {
+        'ky': 'Сатуучу',
+        'ru': 'Продавец',
+        'en': 'Seller',
+        'ko': '판매자',
+      },
+
+      'noName': {
+        'ky': 'Аты жок',
+        'ru': 'Без названия',
+        'en': 'No name',
+        'ko': '이름 없음',
+      },
+
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
+  }
 
   @override
   void dispose() {
@@ -33,28 +132,37 @@ class _MarketplacePageState extends State<MarketplacePage> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
-        title: const Text(
-          '🛍️ Marketplace',
-          style: TextStyle(fontWeight: FontWeight.bold),
+
+        title: Text(
+          t('marketplace'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
       body: Column(
         children: [
+          // =================================================
           // 🔎 ИЗДӨӨ
+          // =================================================
           Container(
             color: Colors.white,
+
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+
             child: TextField(
               controller: searchController,
+
               onChanged: (value) {
                 setState(() {
                   searchText = value.trim().toLowerCase();
                 });
               },
+
               decoration: InputDecoration(
-                hintText: 'Товар издөө...',
+                hintText: t('searchProduct'),
+
                 prefixIcon: const Icon(Icons.search, color: Color(0xFF1565C0)),
+
                 suffixIcon: searchText.isNotEmpty
                     ? IconButton(
                         onPressed: () {
@@ -67,14 +175,19 @@ class _MarketplacePageState extends State<MarketplacePage> {
                         icon: const Icon(Icons.clear),
                       )
                     : null,
+
                 filled: true,
+
                 fillColor: const Color(0xFFF5F7FA),
+
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
+
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
+
                   borderSide: const BorderSide(
                     color: Color(0xFF1565C0),
                     width: 1.5,
@@ -84,7 +197,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
             ),
           ),
 
+          // =================================================
           // 📦 ТОВАРЛАР
+          // =================================================
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
@@ -97,8 +212,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
+
                       child: Text(
-                        'Ката: ${snapshot.error}',
+                        '${t('error')}: ${snapshot.error}',
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -141,7 +257,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+
                   itemCount: products.length,
+
                   itemBuilder: (context, index) {
                     final product = products[index];
 
@@ -149,7 +267,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                     final productId = product.id;
 
-                    final title = data['title']?.toString() ?? 'Аты жок';
+                    final title = data['title']?.toString() ?? t('noName');
 
                     final price = data['price']?.toString() ?? '0';
 
@@ -179,6 +297,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
       // ➕ Товар кошуу
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF1565C0),
+
         foregroundColor: Colors.white,
 
         onPressed: () {
@@ -190,15 +309,18 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
         icon: const Icon(Icons.add),
 
-        label: const Text(
-          'Товар кошуу',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        label: Text(
+          t('addProduct'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
-  // 🔎 Товар табылган жок
+  // =========================================================
+  // 🔎 ТОВАР ТАБЫЛГАН ЖОК
+  // =========================================================
+
   Widget _emptySearch() {
     return Center(
       child: Padding(
@@ -219,7 +341,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
               child: Icon(
                 searchText.isEmpty ? Icons.storefront : Icons.search_off,
+
                 size: 50,
+
                 color: const Color(0xFF1565C0),
               ),
             ),
@@ -227,9 +351,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
             const SizedBox(height: 20),
 
             Text(
-              searchText.isEmpty
-                  ? 'Азырынча товарлар жок'
-                  : 'Товар табылган жок',
+              searchText.isEmpty ? t('noProducts') : t('noProductFound'),
 
               textAlign: TextAlign.center,
 
@@ -239,9 +361,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
             const SizedBox(height: 8),
 
             Text(
-              searchText.isEmpty
-                  ? 'Биринчи болуп товар кошуңуз'
-                  : 'Башка сөз менен кайра издеп көрүңүз',
+              searchText.isEmpty ? t('addFirstProduct') : t('tryAnotherSearch'),
 
               textAlign: TextAlign.center,
 
@@ -253,7 +373,10 @@ class _MarketplacePageState extends State<MarketplacePage> {
     );
   }
 
-  // 🛍️ Товар карточкасы
+  // =========================================================
+  // 🛍️ ТОВАР КАРТОЧКАСЫ
+  // =========================================================
+
   Widget _productCard({
     required BuildContext context,
     required String productId,
@@ -265,6 +388,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }) {
     return Card(
       elevation: 0,
+
       margin: const EdgeInsets.only(bottom: 16),
 
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
@@ -292,7 +416,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
 
           children: [
-            // 📸 Сүрөт
+            // =================================================
+            // 📸 СҮРӨТ
+            // =================================================
             SizedBox(
               width: double.infinity,
               height: 210,
@@ -300,6 +426,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
               child: imageBase64.isNotEmpty
                   ? Image.memory(
                       base64Decode(imageBase64),
+
                       fit: BoxFit.cover,
 
                       errorBuilder: (context, error, stackTrace) {
@@ -309,7 +436,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   : _imagePlaceholder(),
             ),
 
-            // 📦 Маалымат
+            // =================================================
+            // 📦 МААЛЫМАТ
+            // =================================================
             Padding(
               padding: const EdgeInsets.all(17),
 
@@ -319,7 +448,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
                 children: [
                   Text(
                     title,
+
                     maxLines: 2,
+
                     overflow: TextOverflow.ellipsis,
 
                     style: const TextStyle(
@@ -352,12 +483,14 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                         decoration: BoxDecoration(
                           color: const Color(0xFFE8F5E9),
+
                           borderRadius: BorderRadius.circular(20),
                         ),
 
-                        child: const Text(
-                          'Сатууда',
-                          style: TextStyle(
+                        child: Text(
+                          t('selling'),
+
+                          style: const TextStyle(
                             color: Color(0xFF2E7D32),
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -372,7 +505,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   if (description.isNotEmpty)
                     Text(
                       description,
+
                       maxLines: 2,
+
                       overflow: TextOverflow.ellipsis,
 
                       style: const TextStyle(
@@ -396,6 +531,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                         decoration: BoxDecoration(
                           color: const Color(0xFFE3F2FD),
+
                           borderRadius: BorderRadius.circular(10),
                         ),
 
@@ -413,9 +549,10 @@ class _MarketplacePageState extends State<MarketplacePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
 
                           children: [
-                            const Text(
-                              'Сатуучу',
-                              style: TextStyle(
+                            Text(
+                              t('seller'),
+
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey,
                               ),
@@ -423,7 +560,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                             Text(
                               sellerEmail,
+
                               maxLines: 1,
+
                               overflow: TextOverflow.ellipsis,
 
                               style: const TextStyle(
@@ -451,7 +590,10 @@ class _MarketplacePageState extends State<MarketplacePage> {
     );
   }
 
-  // 📸 Сүрөт жок болсо
+  // =========================================================
+  // 📸 СҮРӨТ ЖОК БОЛСО
+  // =========================================================
+
   Widget _imagePlaceholder() {
     return Container(
       color: const Color(0xFFEFF2F5),
