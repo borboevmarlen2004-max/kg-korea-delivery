@@ -1,10 +1,267 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'payment_page.dart';
 
-class OrderDetailsPage extends StatelessWidget {
+class OrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> data;
 
   const OrderDetailsPage({super.key, required this.data});
+
+  @override
+  State<OrderDetailsPage> createState() => _OrderDetailsPageState();
+}
+
+class _OrderDetailsPageState extends State<OrderDetailsPage> {
+  String currentLanguage = 'ky';
+
+  Map<String, dynamic> get data => widget.data;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  // =========================================================
+  // 🌍 КОТОРМО
+  // =========================================================
+
+  String t(String key) {
+    const tr = <String, Map<String, String>>{
+      'orderDetails': {
+        'ky': 'Заказ жөнүндө',
+        'ru': 'О заказе',
+        'en': 'Order details',
+        'ko': '주문 정보',
+      },
+
+      'order': {'ky': 'Заказ', 'ru': 'Заказ', 'en': 'Order', 'ko': '주문'},
+
+      'orderStatus': {
+        'ky': '📊 Заказдын статусу',
+        'ru': '📊 Статус заказа',
+        'en': '📊 Order status',
+        'ko': '📊 주문 상태',
+      },
+
+      'currentStatus': {
+        'ky': 'Учурдагы статус',
+        'ru': 'Текущий статус',
+        'en': 'Current status',
+        'ko': '현재 상태',
+      },
+
+      'orderInfo': {
+        'ky': '📦 Заказ маалыматы',
+        'ru': '📦 Информация о заказе',
+        'en': '📦 Order information',
+        'ko': '📦 주문 정보',
+      },
+
+      'product': {'ky': 'Товар', 'ru': 'Товар', 'en': 'Product', 'ko': '상품'},
+
+      'direction': {
+        'ky': 'Багыты',
+        'ru': 'Направление',
+        'en': 'Direction',
+        'ko': '방향',
+      },
+
+      'from': {'ky': 'Кайдан', 'ru': 'Откуда', 'en': 'From', 'ko': '출발지'},
+
+      'to': {'ky': 'Кайда', 'ru': 'Куда', 'en': 'To', 'ko': '도착지'},
+
+      'phone': {'ky': 'Телефон', 'ru': 'Телефон', 'en': 'Phone', 'ko': '전화번호'},
+
+      'paymentInfo': {
+        'ky': '💰 Төлөм маалыматы',
+        'ru': '💰 Информация об оплате',
+        'en': '💰 Payment information',
+        'ko': '💰 결제 정보',
+      },
+
+      'delivery': {
+        'ky': 'Жеткирүү',
+        'ru': 'Доставка',
+        'en': 'Delivery',
+        'ko': '배송',
+      },
+
+      'total': {
+        'ky': 'Жалпы сумма',
+        'ru': 'Общая сумма',
+        'en': 'Total amount',
+        'ko': '총 금액',
+      },
+
+      'payment': {'ky': 'Төлөм', 'ru': 'Оплата', 'en': 'Payment', 'ko': '결제'},
+
+      'pay': {
+        'ky': 'Төлөмгө өтүү',
+        'ru': 'Перейти к оплате',
+        'en': 'Proceed to payment',
+        'ko': '결제로 이동',
+      },
+
+      'notPaid': {
+        'ky': 'Төлөнө элек',
+        'ru': 'Не оплачено',
+        'en': 'Not paid',
+        'ko': '미결제',
+      },
+
+      'paid': {'ky': 'Төлөндү', 'ru': 'Оплачено', 'en': 'Paid', 'ko': '결제 완료'},
+
+      'notFound': {'ky': 'Жок', 'ru': 'Нет', 'en': 'None', 'ko': '없음'},
+
+      'unknown': {
+        'ky': 'Белгисиз',
+        'ru': 'Неизвестно',
+        'en': 'Unknown',
+        'ko': '알 수 없음',
+      },
+
+      'notProvided': {
+        'ky': 'Көрсөтүлгөн эмес',
+        'ru': 'Не указано',
+        'en': 'Not provided',
+        'ko': '입력되지 않음',
+      },
+
+      'newOrder': {
+        'ky': 'Жаңы заказ',
+        'ru': 'Новый заказ',
+        'en': 'New order',
+        'ko': '새 주문',
+      },
+
+      'accepted': {
+        'ky': 'Кабыл алынды',
+        'ru': 'Принят',
+        'en': 'Accepted',
+        'ko': '접수됨',
+      },
+
+      'preparing': {
+        'ky': 'Даярдалууда',
+        'ru': 'Подготавливается',
+        'en': 'Preparing',
+        'ko': '준비 중',
+      },
+
+      'onWay': {
+        'ky': 'Жолдо',
+        'ru': 'В пути',
+        'en': 'On the way',
+        'ko': '배송 중',
+      },
+
+      'delivered': {
+        'ky': 'Жеткирилди',
+        'ru': 'Доставлен',
+        'en': 'Delivered',
+        'ko': '배송 완료',
+      },
+
+      'cancelled': {
+        'ky': 'Жокко чыгарылды',
+        'ru': 'Отменён',
+        'en': 'Cancelled',
+        'ko': '취소됨',
+      },
+    };
+
+    return tr[key]?[currentLanguage] ?? tr[key]?['ky'] ?? key;
+  }
+
+  // =========================================================
+  // 📊 STATUS TEXT
+  // =========================================================
+
+  String statusText(String status) {
+    const keys = {
+      'Жаңы заказ': 'newOrder',
+      'Кабыл алынды': 'accepted',
+      'Даярдалууда': 'preparing',
+      'Жолдо': 'onWay',
+      'Жеткирилди': 'delivered',
+      'Жокко чыгарылды': 'cancelled',
+    };
+
+    return t(keys[status] ?? status);
+  }
+
+  // =========================================================
+  // 💳 PAYMENT STATUS
+  // =========================================================
+
+  String paymentStatusText(String status) {
+    if (status == 'Төлөндү') {
+      return t('paid');
+    }
+
+    if (status == 'Төлөнө элек') {
+      return t('notPaid');
+    }
+
+    return status;
+  }
+
+  // =========================================================
+  // 🌍 DIRECTION
+  // =========================================================
+
+  String directionText(String value) {
+    if (value == 'Кыргызстан → Корея') {
+      if (currentLanguage == 'ky') {
+        return 'Кыргызстан → Корея';
+      }
+
+      if (currentLanguage == 'ru') {
+        return 'Кыргызстан → Корея';
+      }
+
+      if (currentLanguage == 'en') {
+        return 'Kyrgyzstan → Korea';
+      }
+
+      if (currentLanguage == 'ko') {
+        return '키르기스스탄 → 한국';
+      }
+    }
+
+    if (value == 'Корея → Кыргызстан') {
+      if (currentLanguage == 'ky') {
+        return 'Корея → Кыргызстан';
+      }
+
+      if (currentLanguage == 'ru') {
+        return 'Корея → Кыргызстан';
+      }
+
+      if (currentLanguage == 'en') {
+        return 'Korea → Kyrgyzstan';
+      }
+
+      if (currentLanguage == 'ko') {
+        return '한국 → 키르기스스탄';
+      }
+    }
+
+    return value;
+  }
 
   // =========================================================
   // 🎨 STATUS COLOR
@@ -64,19 +321,23 @@ class OrderDetailsPage extends StatelessWidget {
     }
   }
 
+  // =========================================================
+  // 🏗️ BUILD
+  // =========================================================
+
   @override
   Widget build(BuildContext context) {
-    final orderNumber = data['orderNumber']?.toString() ?? 'Жок';
+    final orderNumber = data['orderNumber']?.toString() ?? t('notFound');
 
-    final direction = data['direction']?.toString() ?? 'Белгисиз';
+    final direction = data['direction']?.toString() ?? t('unknown');
 
-    final product = data['product']?.toString() ?? 'Белгисиз';
+    final product = data['product']?.toString() ?? t('unknown');
 
-    final from = data['from']?.toString() ?? 'Көрсөтүлгөн эмес';
+    final from = data['from']?.toString() ?? t('notProvided');
 
-    final to = data['to']?.toString() ?? 'Көрсөтүлгөн эмес';
+    final to = data['to']?.toString() ?? t('notProvided');
 
-    final phone = data['phone']?.toString() ?? 'Көрсөтүлгөн эмес';
+    final phone = data['phone']?.toString() ?? t('notProvided');
 
     final price = data['price']?.toString() ?? '0';
 
@@ -101,9 +362,9 @@ class OrderDetailsPage extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0,
 
-        title: const Text(
-          '📦 Заказ жөнүндө',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          t('orderDetails'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -123,12 +384,15 @@ class OrderDetailsPage extends StatelessWidget {
 
               decoration: BoxDecoration(
                 color: const Color(0xFF1565C0),
+
                 borderRadius: BorderRadius.circular(24),
 
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF1565C0).withOpacity(0.18),
+                    color: const Color(0xFF1565C0).withValues(alpha: 0.18),
+
                     blurRadius: 18,
+
                     offset: const Offset(0, 7),
                   ),
                 ],
@@ -141,7 +405,8 @@ class OrderDetailsPage extends StatelessWidget {
                     height: 58,
 
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.16),
+                      color: Colors.white.withValues(alpha: 0.16),
+
                       shape: BoxShape.circle,
                     ),
 
@@ -159,16 +424,22 @@ class OrderDetailsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
 
                       children: [
-                        const Text(
-                          'Заказ',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        Text(
+                          t('order'),
+
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
                         ),
 
                         const SizedBox(height: 3),
 
                         Text(
                           orderNumber,
+
                           maxLines: 1,
+
                           overflow: TextOverflow.ellipsis,
 
                           style: const TextStyle(
@@ -181,8 +452,10 @@ class OrderDetailsPage extends StatelessWidget {
                         const SizedBox(height: 5),
 
                         Text(
-                          direction,
+                          directionText(direction),
+
                           maxLines: 1,
+
                           overflow: TextOverflow.ellipsis,
 
                           style: const TextStyle(
@@ -202,19 +475,22 @@ class OrderDetailsPage extends StatelessWidget {
             // =================================================
             // 📊 STATUS
             // =================================================
-            const Text(
-              '📊 Заказдын статусу',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              t('orderStatus'),
+
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
 
             Container(
               width: double.infinity,
+
               padding: const EdgeInsets.all(17),
 
               decoration: BoxDecoration(
                 color: Colors.white,
+
                 borderRadius: BorderRadius.circular(20),
               ),
 
@@ -225,23 +501,27 @@ class OrderDetailsPage extends StatelessWidget {
                     height: 48,
 
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.10),
+                      color: statusColor.withValues(alpha: 0.10),
+
                       borderRadius: BorderRadius.circular(14),
                     ),
 
                     child: Icon(
                       getStatusIcon(status),
+
                       color: statusColor,
+
                       size: 25,
                     ),
                   ),
 
                   const SizedBox(width: 13),
 
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Учурдагы статус',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      t('currentStatus'),
+
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ),
 
@@ -252,12 +532,14 @@ class OrderDetailsPage extends StatelessWidget {
                     ),
 
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.10),
+                      color: statusColor.withValues(alpha: 0.10),
+
                       borderRadius: BorderRadius.circular(20),
                     ),
 
                     child: Text(
-                      status,
+                      statusText(status),
+
                       style: TextStyle(
                         color: statusColor,
                         fontSize: 11,
@@ -274,9 +556,10 @@ class OrderDetailsPage extends StatelessWidget {
             // =================================================
             // 📦 PRODUCT
             // =================================================
-            const Text(
-              '📦 Заказ маалыматы',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              t('orderInfo'),
+
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
@@ -288,28 +571,33 @@ class OrderDetailsPage extends StatelessWidget {
 
               decoration: BoxDecoration(
                 color: Colors.white,
+
                 borderRadius: BorderRadius.circular(22),
               ),
 
               child: Column(
                 children: [
-                  detail(Icons.inventory_2_outlined, 'Товар', product),
+                  detail(Icons.inventory_2_outlined, t('product'), product),
 
                   _divider(),
 
-                  detail(Icons.swap_horiz, 'Багыты', direction),
+                  detail(
+                    Icons.swap_horiz,
+                    t('direction'),
+                    directionText(direction),
+                  ),
 
                   _divider(),
 
-                  detail(Icons.location_on_outlined, 'Кайдан', from),
+                  detail(Icons.location_on_outlined, t('from'), from),
 
                   _divider(),
 
-                  detail(Icons.location_searching, 'Кайда', to),
+                  detail(Icons.location_searching, t('to'), to),
 
                   _divider(),
 
-                  detail(Icons.phone_outlined, 'Телефон', phone),
+                  detail(Icons.phone_outlined, t('phone'), phone),
                 ],
               ),
             ),
@@ -319,9 +607,10 @@ class OrderDetailsPage extends StatelessWidget {
             // =================================================
             // 💰 PAYMENT
             // =================================================
-            const Text(
-              '💰 Төлөм маалыматы',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              t('paymentInfo'),
+
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
@@ -333,16 +622,17 @@ class OrderDetailsPage extends StatelessWidget {
 
               decoration: BoxDecoration(
                 color: Colors.white,
+
                 borderRadius: BorderRadius.circular(22),
               ),
 
               child: Column(
                 children: [
-                  _priceRow('Товар', '$price сом'),
+                  _priceRow(t('product'), '$price сом'),
 
                   const SizedBox(height: 11),
 
-                  _priceRow('Жеткирүү', '$deliveryFee сом'),
+                  _priceRow(t('delivery'), '$deliveryFee сом'),
 
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 13),
@@ -352,9 +642,10 @@ class OrderDetailsPage extends StatelessWidget {
 
                   Row(
                     children: [
-                      const Text(
-                        'Жалпы сумма',
-                        style: TextStyle(
+                      Text(
+                        t('total'),
+
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -364,6 +655,7 @@ class OrderDetailsPage extends StatelessWidget {
 
                       Text(
                         '$totalPrice сом',
+
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -377,12 +669,14 @@ class OrderDetailsPage extends StatelessWidget {
 
                   Container(
                     width: double.infinity,
+
                     padding: const EdgeInsets.all(13),
 
                     decoration: BoxDecoration(
                       color: paymentStatus == 'Төлөндү'
-                          ? Colors.green.withOpacity(0.08)
-                          : Colors.orange.withOpacity(0.08),
+                          ? Colors.green.withValues(alpha: 0.08)
+                          : Colors.orange.withValues(alpha: 0.08),
+
                       borderRadius: BorderRadius.circular(15),
                     ),
 
@@ -392,7 +686,9 @@ class OrderDetailsPage extends StatelessWidget {
                           paymentStatus == 'Төлөндү'
                               ? Icons.check_circle_outline
                               : Icons.payment_outlined,
+
                           size: 20,
+
                           color: paymentStatus == 'Төлөндү'
                               ? Colors.green
                               : Colors.orange,
@@ -402,10 +698,12 @@ class OrderDetailsPage extends StatelessWidget {
 
                         Expanded(
                           child: Text(
-                            'Төлөм: $paymentStatus',
+                            '${t('payment')}: ${paymentStatusText(paymentStatus)}',
+
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
+
                               color: paymentStatus == 'Төлөндү'
                                   ? Colors.green
                                   : Colors.orange,
@@ -432,6 +730,7 @@ class OrderDetailsPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
+
                     MaterialPageRoute(
                       builder: (context) => PaymentPage(data: data),
                     ),
@@ -440,6 +739,7 @@ class OrderDetailsPage extends StatelessWidget {
 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1565C0),
+
                   foregroundColor: Colors.white,
 
                   elevation: 0,
@@ -451,9 +751,13 @@ class OrderDetailsPage extends StatelessWidget {
 
                 icon: const Icon(Icons.credit_card),
 
-                label: const Text(
-                  'Төлөмгө өтүү',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                label: Text(
+                  t('pay'),
+
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -481,6 +785,7 @@ class OrderDetailsPage extends StatelessWidget {
 
             decoration: BoxDecoration(
               color: const Color(0xFFE3F2FD),
+
               borderRadius: BorderRadius.circular(12),
             ),
 
@@ -496,6 +801,7 @@ class OrderDetailsPage extends StatelessWidget {
               children: [
                 Text(
                   title,
+
                   style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
 
@@ -503,6 +809,7 @@ class OrderDetailsPage extends StatelessWidget {
 
                 Text(
                   value?.toString() ?? '',
+
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -529,6 +836,7 @@ class OrderDetailsPage extends StatelessWidget {
 
         Text(
           value,
+
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ],
