@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BuyProductPage extends StatefulWidget {
   final String productId;
@@ -26,6 +27,13 @@ class _BuyProductPageState extends State<BuyProductPage> {
   final phoneController = TextEditingController();
 
   bool isLoading = false;
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
 
   @override
   void dispose() {
@@ -35,13 +43,156 @@ class _BuyProductPageState extends State<BuyProductPage> {
     super.dispose();
   }
 
+  // =========================================================
+  // 🌍 LANGUAGE
+  // =========================================================
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'buyProduct': {
+        'ky': '🛒 Сатып алуу',
+        'ru': '🛒 Покупка',
+        'en': '🛒 Purchase',
+        'ko': '🛒 구매',
+      },
+
+      'loginFirst': {
+        'ky': 'Адегенде аккаунтка кириңиз',
+        'ru': 'Сначала войдите в аккаунт',
+        'en': 'Please log in first',
+        'ko': '먼저 로그인해주세요',
+      },
+
+      'fillAllFields': {
+        'ky': 'Бардык талааларды толтуруңуз',
+        'ru': 'Заполните все поля',
+        'en': 'Fill in all fields',
+        'ko': '모든 항목을 입력해주세요',
+      },
+
+      'productNotFound': {
+        'ky': 'Бул товар табылган жок.',
+        'ru': 'Этот товар не найден.',
+        'en': 'This product was not found.',
+        'ko': '이 상품을 찾을 수 없습니다.',
+      },
+
+      'alreadySold': {
+        'ky': 'Бул товар буга чейин сатылып кеткен.',
+        'ru': 'Этот товар уже продан.',
+        'en': 'This product has already been sold.',
+        'ko': '이 상품은 이미 판매되었습니다.',
+      },
+
+      'orderCreated': {
+        'ky': 'Заказ ийгиликтүү түзүлдү! 🎉',
+        'ru': 'Заказ успешно создан! 🎉',
+        'en': 'Order created successfully! 🎉',
+        'ko': '주문이 성공적으로 생성되었습니다! 🎉',
+      },
+
+      'purchaseError': {
+        'ky': 'Сатып алууда ката',
+        'ru': 'Ошибка при покупке',
+        'en': 'Purchase error',
+        'ko': '구매 오류',
+      },
+
+      'price': {'ky': 'Баасы', 'ru': 'Цена', 'en': 'Price', 'ko': '가격'},
+
+      'seller': {
+        'ky': 'Сатуучу',
+        'ru': 'Продавец',
+        'en': 'Seller',
+        'ko': '판매자',
+      },
+
+      'deliveryInfo': {
+        'ky': 'Жеткирүү маалыматы',
+        'ru': 'Информация о доставке',
+        'en': 'Delivery Information',
+        'ko': '배송 정보',
+      },
+
+      'from': {'ky': 'Кайдан', 'ru': 'Откуда', 'en': 'From', 'ko': '출발지'},
+
+      'fromHint': {
+        'ky': 'Мисалы: Бишкек',
+        'ru': 'Например: Бишкек',
+        'en': 'Example: Bishkek',
+        'ko': '예: Bishkek',
+      },
+
+      'to': {'ky': 'Кайда', 'ru': 'Куда', 'en': 'To', 'ko': '도착지'},
+
+      'toHint': {
+        'ky': 'Мисалы: Сеул',
+        'ru': 'Например: Сеул',
+        'en': 'Example: Seoul',
+        'ko': '예: Seoul',
+      },
+
+      'phone': {'ky': 'Телефон', 'ru': 'Телефон', 'en': 'Phone', 'ko': '전화번호'},
+
+      'payment': {'ky': 'Төлөм', 'ru': 'Оплата', 'en': 'Payment', 'ko': '결제'},
+
+      'byCard': {
+        'ky': 'Карта аркылуу',
+        'ru': 'Картой',
+        'en': 'By card',
+        'ko': '카드 결제',
+      },
+
+      'creatingOrder': {
+        'ky': 'Заказ түзүлүүдө...',
+        'ru': 'Создание заказа...',
+        'en': 'Creating order...',
+        'ko': '주문 생성 중...',
+      },
+
+      'placeOrder': {
+        'ky': 'Заказ берүү',
+        'ru': 'Оформить заказ',
+        'en': 'Place Order',
+        'ko': '주문하기',
+      },
+
+      'soldAfterOrder': {
+        'ky': 'Заказ берилгенден кийин товар сатылды деп белгиленет.',
+        'ru': 'После оформления заказа товар будет отмечен как проданный.',
+        'en': 'After placing the order, the product will be marked as sold.',
+        'ko': '주문 후 상품은 판매 완료로 표시됩니다.',
+      },
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
+  }
+
+  // =========================================================
+  // 🛒 ЗАКАЗ ТҮЗҮҮ
+  // =========================================================
+
   Future<void> createOrder() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Адегенде аккаунтка кириңиз')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('loginFirst'))));
+
       return;
     }
 
@@ -50,9 +201,10 @@ class _BuyProductPageState extends State<BuyProductPage> {
     final phone = phoneController.text.trim();
 
     if (from.isEmpty || to.isEmpty || phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Бардык талааларды толтуруңуз')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('fillAllFields'))));
+
       return;
     }
 
@@ -65,8 +217,8 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
       final orderNumber = 'MKT${DateTime.now().millisecondsSinceEpoch}';
 
-      // 🔒 Бир эле товарды эки адам сатып алып
-      // кетпеши үчүн transaction колдонулат.
+      // 🔒 Бир эле товарды эки адам сатып албашы үчүн
+      // transaction колдонулат.
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         final productRef = FirebaseFirestore.instance
             .collection('marketplace')
@@ -75,14 +227,14 @@ class _BuyProductPageState extends State<BuyProductPage> {
         final productSnapshot = await transaction.get(productRef);
 
         if (!productSnapshot.exists) {
-          throw Exception('Бул товар табылган жок.');
+          throw Exception(t('productNotFound'));
         }
 
         final productData = productSnapshot.data() as Map<String, dynamic>;
 
         // 🛑 Товар мурда сатылып кеткенби?
         if (productData['sold'] == true) {
-          throw Exception('Бул товар буга чейин сатылып кеткен.');
+          throw Exception(t('alreadySold'));
         }
 
         // 🛒 Заказ түзөбүз
@@ -123,9 +275,9 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Заказ ийгиликтүү түзүлдү! 🎉')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t('orderCreated'))));
 
       Navigator.pop(context);
     } catch (e) {
@@ -133,7 +285,7 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Сатып алууда ката: $e')));
+      ).showSnackBar(SnackBar(content: Text('${t('purchaseError')}: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -142,6 +294,10 @@ class _BuyProductPageState extends State<BuyProductPage> {
       }
     }
   }
+
+  // =========================================================
+  // 🏠 BUILD
+  // =========================================================
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +308,10 @@ class _BuyProductPageState extends State<BuyProductPage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
-        title: const Text(
-          '🛒 Сатып алуу',
-          style: TextStyle(fontWeight: FontWeight.bold),
+
+        title: Text(
+          t('buyProduct'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -163,10 +320,14 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
+            // =================================================
             // 🛍️ ТОВАР МААЛЫМАТЫ
+            // =================================================
             Container(
               width: double.infinity,
+
               padding: const EdgeInsets.all(20),
 
               decoration: BoxDecoration(
@@ -176,6 +337,7 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
                   Row(
                     children: [
@@ -200,7 +362,9 @@ class _BuyProductPageState extends State<BuyProductPage> {
                       Expanded(
                         child: Text(
                           widget.productTitle,
+
                           maxLines: 2,
+
                           overflow: TextOverflow.ellipsis,
 
                           style: const TextStyle(
@@ -221,15 +385,20 @@ class _BuyProductPageState extends State<BuyProductPage> {
                   // 💰 Баасы
                   Row(
                     children: [
-                      const Text(
-                        'Баасы',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      Text(
+                        t('price'),
+
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
                       ),
 
                       const Spacer(),
 
                       Text(
                         '${widget.price} сом',
+
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -255,7 +424,9 @@ class _BuyProductPageState extends State<BuyProductPage> {
                       Expanded(
                         child: Text(
                           widget.sellerEmail,
+
                           maxLines: 1,
+
                           overflow: TextOverflow.ellipsis,
 
                           style: const TextStyle(
@@ -272,16 +443,20 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
             const SizedBox(height: 20),
 
+            // =================================================
             // 📦 ЖЕТКИРҮҮ МААЛЫМАТЫ
-            const Text(
-              'Жеткирүү маалыматы',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            // =================================================
+            Text(
+              t('deliveryInfo'),
+
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 12),
 
             Container(
               width: double.infinity,
+
               padding: const EdgeInsets.all(18),
 
               decoration: BoxDecoration(
@@ -294,8 +469,8 @@ class _BuyProductPageState extends State<BuyProductPage> {
                   // 📍 Кайдан
                   _buildTextField(
                     controller: fromController,
-                    label: 'Кайдан',
-                    hint: 'Мисалы: Бишкек',
+                    label: t('from'),
+                    hint: t('fromHint'),
                     icon: Icons.location_on_outlined,
                   ),
 
@@ -304,8 +479,8 @@ class _BuyProductPageState extends State<BuyProductPage> {
                   // 📍 Кайда
                   _buildTextField(
                     controller: toController,
-                    label: 'Кайда',
-                    hint: 'Мисалы: Сеул',
+                    label: t('to'),
+                    hint: t('toHint'),
                     icon: Icons.location_searching,
                   ),
 
@@ -314,7 +489,7 @@ class _BuyProductPageState extends State<BuyProductPage> {
                   // 📞 Телефон
                   _buildTextField(
                     controller: phoneController,
-                    label: 'Телефон',
+                    label: t('phone'),
                     hint: '+996 ...',
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
@@ -325,9 +500,12 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
             const SizedBox(height: 20),
 
+            // =================================================
             // 💳 ТӨЛӨМ
+            // =================================================
             Container(
               width: double.infinity,
+
               padding: const EdgeInsets.all(18),
 
               decoration: BoxDecoration(
@@ -354,18 +532,26 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
                   const SizedBox(width: 12),
 
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+
                       children: [
                         Text(
-                          'Төлөм',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          t('payment'),
+
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 3),
+
+                        const SizedBox(height: 3),
+
                         Text(
-                          'Карта аркылуу',
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                          t('byCard'),
+
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -373,6 +559,7 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
                   Text(
                     '${widget.price} сом',
+
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1565C0),
@@ -384,7 +571,9 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
             const SizedBox(height: 25),
 
+            // =================================================
             // 🛒 ЗАКАЗ БЕРҮҮ
+            // =================================================
             SizedBox(
               width: double.infinity,
               height: 58,
@@ -394,6 +583,7 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1565C0),
+
                   foregroundColor: Colors.white,
 
                   elevation: 0,
@@ -407,6 +597,7 @@ class _BuyProductPageState extends State<BuyProductPage> {
                     ? const SizedBox(
                         width: 21,
                         height: 21,
+
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
@@ -415,7 +606,8 @@ class _BuyProductPageState extends State<BuyProductPage> {
                     : const Icon(Icons.shopping_cart_outlined),
 
                 label: Text(
-                  isLoading ? 'Заказ түзүлүүдө...' : 'Заказ берүү',
+                  isLoading ? t('creatingOrder') : t('placeOrder'),
+
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -426,11 +618,13 @@ class _BuyProductPageState extends State<BuyProductPage> {
 
             const SizedBox(height: 12),
 
-            const Center(
+            Center(
               child: Text(
-                'Заказ берилгенден кийин товар сатылды деп белгиленет.',
+                t('soldAfterOrder'),
+
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ),
           ],
@@ -439,7 +633,10 @@ class _BuyProductPageState extends State<BuyProductPage> {
     );
   }
 
-  // ✏️ Кооз TextField
+  // =========================================================
+  // ✏️ TEXT FIELD
+  // =========================================================
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -454,9 +651,11 @@ class _BuyProductPageState extends State<BuyProductPage> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
+
         prefixIcon: Icon(icon, color: const Color(0xFF1565C0)),
 
         filled: true,
+
         fillColor: const Color(0xFFF5F7FA),
 
         border: OutlineInputBorder(
