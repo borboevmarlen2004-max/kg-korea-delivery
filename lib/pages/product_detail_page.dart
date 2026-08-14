@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'buy_product_page.dart';
 import 'edit_product_page.dart';
 
-class ProductDetailPage extends StatelessWidget {
+class ProductDetailPage extends StatefulWidget {
   final String productId;
   final String title;
   final String price;
@@ -26,11 +27,124 @@ class ProductDetailPage extends StatelessWidget {
   });
 
   @override
+  State<ProductDetailPage> createState() => _ProductDetailPageState();
+}
+
+class _ProductDetailPageState extends State<ProductDetailPage> {
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'productDetails': {
+        'ky': 'Товар тууралуу',
+        'ru': 'О товаре',
+        'en': 'Product Details',
+        'ko': '상품 정보',
+      },
+      'selling': {
+        'ky': 'Сатууда',
+        'ru': 'В продаже',
+        'en': 'For sale',
+        'ko': '판매 중',
+      },
+      'description': {
+        'ky': 'Сүрөттөмө',
+        'ru': 'Описание',
+        'en': 'Description',
+        'ko': '설명',
+      },
+      'noDescription': {
+        'ky': 'Сүрөттөмө жок',
+        'ru': 'Описание отсутствует',
+        'en': 'No description',
+        'ko': '설명이 없습니다',
+      },
+      'seller': {
+        'ky': 'Сатуучу',
+        'ru': 'Продавец',
+        'en': 'Seller',
+        'ko': '판매자',
+      },
+      'buy': {'ky': 'Сатып алуу', 'ru': 'Купить', 'en': 'Buy', 'ko': '구매하기'},
+      'productManagement': {
+        'ky': 'Товарды башкаруу',
+        'ru': 'Управление товаром',
+        'en': 'Product Management',
+        'ko': '상품 관리',
+      },
+      'editProduct': {
+        'ky': 'Товарды өзгөртүү',
+        'ru': 'Изменить товар',
+        'en': 'Edit Product',
+        'ko': '상품 수정',
+      },
+      'deleteProduct': {
+        'ky': 'Товарды өчүрүү',
+        'ru': 'Удалить товар',
+        'en': 'Delete Product',
+        'ko': '상품 삭제',
+      },
+      'deleteQuestion': {
+        'ky': 'Товарды өчүрүү?',
+        'ru': 'Удалить товар?',
+        'en': 'Delete product?',
+        'ko': '상품을 삭제하시겠습니까?',
+      },
+      'deleteInfo': {
+        'ky': 'Бул товар Marketplaceтен өчүрүлөт. Улантасызбы?',
+        'ru': 'Этот товар будет удалён из Marketplace. Продолжить?',
+        'en': 'This product will be removed from Marketplace. Continue?',
+        'ko': '이 상품은 Marketplace에서 삭제됩니다. 계속하시겠습니까?',
+      },
+      'no': {'ky': 'Жок', 'ru': 'Нет', 'en': 'No', 'ko': '아니요'},
+      'yesDelete': {
+        'ky': 'Ооба, өчүрүү',
+        'ru': 'Да, удалить',
+        'en': 'Yes, delete',
+        'ko': '예, 삭제',
+      },
+      'deleted': {
+        'ky': 'Товар өчүрүлдү 🗑️',
+        'ru': 'Товар удалён 🗑️',
+        'en': 'Product deleted 🗑️',
+        'ko': '상품이 삭제되었습니다 🗑️',
+      },
+      'deleteError': {
+        'ky': 'Өчүрүүдө ката',
+        'ru': 'Ошибка удаления',
+        'en': 'Delete error',
+        'ko': '삭제 오류',
+      },
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
     // Бул товарды азыр кирген адам сатабы?
-    final isSeller = user?.email == sellerEmail;
+    final isSeller = user?.email == widget.sellerEmail;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -40,9 +154,10 @@ class ProductDetailPage extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0,
         centerTitle: false,
-        title: const Text(
-          'Товар тууралуу',
-          style: TextStyle(fontWeight: FontWeight.bold),
+
+        title: Text(
+          t('productDetails'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -51,8 +166,11 @@ class ProductDetailPage extends StatelessWidget {
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
+            // =================================================
             // 📸 ТОВАРДЫН СҮРӨТҮ
+            // =================================================
             Container(
               width: double.infinity,
               height: 300,
@@ -60,9 +178,10 @@ class ProductDetailPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
+
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -71,11 +190,13 @@ class ProductDetailPage extends StatelessWidget {
 
               clipBehavior: Clip.antiAlias,
 
-              child: imageBase64.isNotEmpty
+              child: widget.imageBase64.isNotEmpty
                   ? Image.memory(
-                      base64Decode(imageBase64),
+                      base64Decode(widget.imageBase64),
+
                       width: double.infinity,
                       height: double.infinity,
+
                       fit: BoxFit.cover,
 
                       errorBuilder: (context, error, stackTrace) {
@@ -87,7 +208,9 @@ class ProductDetailPage extends StatelessWidget {
 
             const SizedBox(height: 22),
 
+            // =================================================
             // 🏷️ ТОВАРДЫН НЕГИЗГИ МААЛЫМАТЫ
+            // =================================================
             Container(
               width: double.infinity,
 
@@ -102,9 +225,9 @@ class ProductDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  // Товар аты
                   Text(
-                    title,
+                    widget.title,
+
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -119,7 +242,8 @@ class ProductDetailPage extends StatelessWidget {
 
                     children: [
                       Text(
-                        '$price сом',
+                        '${widget.price} сом',
+
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -140,18 +264,22 @@ class ProductDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
 
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
+
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.check_circle,
                               size: 16,
                               color: Color(0xFF2E7D32),
                             ),
-                            SizedBox(width: 5),
+
+                            const SizedBox(width: 5),
+
                             Text(
-                              'Сатууда',
-                              style: TextStyle(
+                              t('selling'),
+
+                              style: const TextStyle(
                                 color: Color(0xFF2E7D32),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
@@ -168,7 +296,9 @@ class ProductDetailPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+            // =================================================
             // 📝 СҮРӨТТӨМӨ
+            // =================================================
             Container(
               width: double.infinity,
 
@@ -183,16 +313,19 @@ class ProductDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.description_outlined,
                         color: Color(0xFF1565C0),
                       ),
-                      SizedBox(width: 8),
+
+                      const SizedBox(width: 8),
+
                       Text(
-                        'Сүрөттөмө',
-                        style: TextStyle(
+                        t('description'),
+
+                        style: const TextStyle(
                           fontSize: 19,
                           fontWeight: FontWeight.bold,
                         ),
@@ -203,12 +336,15 @@ class ProductDetailPage extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   Text(
-                    description.isNotEmpty ? description : 'Сүрөттөмө жок',
+                    widget.description.isNotEmpty
+                        ? widget.description
+                        : t('noDescription'),
 
                     style: TextStyle(
                       fontSize: 15,
                       height: 1.5,
-                      color: description.isNotEmpty
+
+                      color: widget.description.isNotEmpty
                           ? Colors.black87
                           : Colors.grey,
                     ),
@@ -219,7 +355,9 @@ class ProductDetailPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
+            // =================================================
             // 👤 САТУУЧУ
+            // =================================================
             Container(
               width: double.infinity,
 
@@ -255,16 +393,22 @@ class ProductDetailPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
 
                       children: [
-                        const Text(
-                          'Сатуучу',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        Text(
+                          t('seller'),
+
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
 
                         const SizedBox(height: 3),
 
                         Text(
-                          sellerEmail,
+                          widget.sellerEmail,
+
                           maxLines: 1,
+
                           overflow: TextOverflow.ellipsis,
 
                           style: const TextStyle(
@@ -281,7 +425,9 @@ class ProductDetailPage extends StatelessWidget {
 
             const SizedBox(height: 24),
 
+            // =================================================
             // 🛒 САТЫП АЛУУ
+            // =================================================
             SizedBox(
               width: double.infinity,
               height: 58,
@@ -289,6 +435,7 @@ class ProductDetailPage extends StatelessWidget {
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1565C0),
+
                   foregroundColor: Colors.white,
 
                   elevation: 0,
@@ -303,10 +450,10 @@ class ProductDetailPage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => BuyProductPage(
-                        productId: productId,
-                        productTitle: title,
-                        price: price,
-                        sellerEmail: sellerEmail,
+                        productId: widget.productId,
+                        productTitle: widget.title,
+                        price: widget.price,
+                        sellerEmail: widget.sellerEmail,
                       ),
                     ),
                   );
@@ -314,14 +461,20 @@ class ProductDetailPage extends StatelessWidget {
 
                 icon: const Icon(Icons.shopping_cart_outlined),
 
-                label: const Text(
-                  'Сатып алуу',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                label: Text(
+                  t('buy'),
+
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
 
+            // =================================================
             // 👇 САТУУЧУ ҮЧҮН БӨЛҮК
+            // =================================================
             if (isSeller) ...[
               const SizedBox(height: 24),
 
@@ -339,9 +492,10 @@ class ProductDetailPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-                    const Text(
-                      'Товарды башкаруу',
-                      style: TextStyle(
+                    Text(
+                      t('productManagement'),
+
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -357,7 +511,9 @@ class ProductDetailPage extends StatelessWidget {
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE3F2FD),
+
                           foregroundColor: const Color(0xFF1565C0),
+
                           elevation: 0,
 
                           shape: RoundedRectangleBorder(
@@ -370,11 +526,11 @@ class ProductDetailPage extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EditProductPage(
-                                productId: productId,
-                                title: title,
-                                price: price,
-                                description: description,
-                                imageBase64: imageBase64,
+                                productId: widget.productId,
+                                title: widget.title,
+                                price: widget.price,
+                                description: widget.description,
+                                imageBase64: widget.imageBase64,
                               ),
                             ),
                           );
@@ -382,9 +538,10 @@ class ProductDetailPage extends StatelessWidget {
 
                         icon: const Icon(Icons.edit_outlined),
 
-                        label: const Text(
-                          'Товарды өзгөртүү',
-                          style: TextStyle(
+                        label: Text(
+                          t('editProduct'),
+
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -402,6 +559,7 @@ class ProductDetailPage extends StatelessWidget {
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,
+
                           side: const BorderSide(color: Colors.red),
 
                           shape: RoundedRectangleBorder(
@@ -415,11 +573,9 @@ class ProductDetailPage extends StatelessWidget {
 
                             builder: (context) {
                               return AlertDialog(
-                                title: const Text('Товарды өчүрүү?'),
+                                title: Text(t('deleteQuestion')),
 
-                                content: const Text(
-                                  'Бул товар Marketplaceтен өчүрүлөт. Улантасызбы?',
-                                ),
+                                content: Text(t('deleteInfo')),
 
                                 actions: [
                                   TextButton(
@@ -427,7 +583,7 @@ class ProductDetailPage extends StatelessWidget {
                                       Navigator.pop(context, false);
                                     },
 
-                                    child: const Text('Жок'),
+                                    child: Text(t('no')),
                                   ),
 
                                   TextButton(
@@ -435,9 +591,10 @@ class ProductDetailPage extends StatelessWidget {
                                       Navigator.pop(context, true);
                                     },
 
-                                    child: const Text(
-                                      'Ооба, өчүрүү',
-                                      style: TextStyle(color: Colors.red),
+                                    child: Text(
+                                      t('yesDelete'),
+
+                                      style: const TextStyle(color: Colors.red),
                                     ),
                                   ),
                                 ],
@@ -452,7 +609,7 @@ class ProductDetailPage extends StatelessWidget {
                           try {
                             await FirebaseFirestore.instance
                                 .collection('marketplace')
-                                .doc(productId)
+                                .doc(widget.productId)
                                 .delete();
 
                             if (!context.mounted) {
@@ -460,9 +617,7 @@ class ProductDetailPage extends StatelessWidget {
                             }
 
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Товар өчүрүлдү 🗑️'),
-                              ),
+                              SnackBar(content: Text(t('deleted'))),
                             );
 
                             Navigator.pop(context);
@@ -472,16 +627,19 @@ class ProductDetailPage extends StatelessWidget {
                             }
 
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Өчүрүүдө ката: $e')),
+                              SnackBar(
+                                content: Text('${t('deleteError')}: $e'),
+                              ),
                             );
                           }
                         },
 
                         icon: const Icon(Icons.delete_outline),
 
-                        label: const Text(
-                          'Товарды өчүрүү',
-                          style: TextStyle(
+                        label: Text(
+                          t('deleteProduct'),
+
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -498,7 +656,10 @@ class ProductDetailPage extends StatelessWidget {
     );
   }
 
-  // 📸 Сүрөт жок болсо
+  // =========================================================
+  // 📸 СҮРӨТ ЖОК БОЛСО
+  // =========================================================
+
   static Widget _imagePlaceholder() {
     return Container(
       color: const Color(0xFFEFF2F5),
