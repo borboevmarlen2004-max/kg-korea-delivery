@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminChatDetailPage extends StatefulWidget {
   final String uid;
@@ -19,11 +20,88 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
   final messageController = TextEditingController();
 
   bool isSending = false;
+  String currentLanguage = 'ky';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
 
   @override
   void dispose() {
     messageController.dispose();
     super.dispose();
+  }
+
+  // =========================================================
+  // 🌍 LANGUAGE
+  // =========================================================
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final language = prefs.getString('language') ?? 'ky';
+
+    if (!mounted) return;
+
+    setState(() {
+      currentLanguage = language;
+    });
+  }
+
+  String t(String key) {
+    const translations = <String, Map<String, String>>{
+      'customerChat': {
+        'ky': 'Кардар менен чат',
+        'ru': 'Чат с клиентом',
+        'en': 'Customer chat',
+        'ko': '고객 채팅',
+      },
+
+      'admin': {'ky': 'Админ', 'ru': 'Админ', 'en': 'Admin', 'ko': '관리자'},
+
+      'customer': {
+        'ky': 'Кардар',
+        'ru': 'Клиент',
+        'en': 'Customer',
+        'ko': '고객',
+      },
+
+      'noMessages': {
+        'ky': 'Билдирүүлөр жок',
+        'ru': 'Сообщений нет',
+        'en': 'No messages',
+        'ko': '메시지가 없습니다',
+      },
+
+      'firstReply': {
+        'ky': 'Кардарга биринчи жоопту жазыңыз.',
+        'ru': 'Напишите первый ответ клиенту.',
+        'en': 'Write the first reply to the customer.',
+        'ko': '고객에게 첫 답변을 보내세요.',
+      },
+
+      'replyHint': {
+        'ky': 'Кардарга жооп жазыңыз...',
+        'ru': 'Напишите ответ клиенту...',
+        'en': 'Write a reply to the customer...',
+        'ko': '고객에게 답변을 입력하세요...',
+      },
+
+      'sendError': {
+        'ky': 'Жооп жөнөтүүдө ката',
+        'ru': 'Ошибка отправки ответа',
+        'en': 'Error sending reply',
+        'ko': '답변 전송 오류',
+      },
+
+      'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+    };
+
+    return translations[key]?[currentLanguage] ??
+        translations[key]?['ky'] ??
+        key;
   }
 
   // =========================================================
@@ -59,7 +137,7 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Жооп жөнөтүүдө ката: $e')));
+      ).showSnackBar(SnackBar(content: Text('${t('sendError')}: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -118,7 +196,7 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -133,21 +211,25 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
           children: [
             Row(
               mainAxisSize: MainAxisSize.min,
+
               children: [
                 Icon(
                   isAdmin ? Icons.admin_panel_settings : Icons.person,
+
                   size: 15,
+
                   color: isAdmin ? Colors.white70 : Colors.grey.shade600,
                 ),
 
                 const SizedBox(width: 5),
 
                 Text(
-                  isAdmin ? 'Админ' : 'Кардар',
+                  isAdmin ? t('admin') : t('customer'),
 
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
+
                     color: isAdmin ? Colors.white70 : Colors.grey.shade600,
                   ),
                 ),
@@ -162,6 +244,7 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
               style: TextStyle(
                 fontSize: 16,
                 height: 1.3,
+
                 color: isAdmin ? Colors.white : Colors.black87,
               ),
             ),
@@ -173,6 +256,7 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
               style: TextStyle(
                 fontSize: 10,
+
                 color: isAdmin ? Colors.white70 : Colors.grey,
               ),
             ),
@@ -193,7 +277,9 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
       appBar: AppBar(
         backgroundColor: Colors.white,
+
         foregroundColor: Colors.black87,
+
         elevation: 0,
 
         titleSpacing: 12,
@@ -204,8 +290,8 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
               width: 42,
               height: 42,
 
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE3F2FD),
                 shape: BoxShape.circle,
               ),
 
@@ -221,7 +307,9 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
                 children: [
                   Text(
                     widget.email,
+
                     maxLines: 1,
+
                     overflow: TextOverflow.ellipsis,
 
                     style: const TextStyle(
@@ -232,15 +320,23 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
                   const SizedBox(height: 2),
 
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.support_agent, size: 12, color: Colors.green),
+                      const Icon(
+                        Icons.support_agent,
+                        size: 12,
+                        color: Colors.green,
+                      ),
 
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
 
                       Text(
-                        'Кардар менен чат',
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
+                        t('customerChat'),
+
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -270,8 +366,10 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
+
                       child: Text(
-                        'Ката: ${snapshot.error}',
+                        '${t('error')}: ${snapshot.error}',
+
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -296,21 +394,25 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
                           decoration: BoxDecoration(
                             color: const Color(0xFFE3F2FD),
+
                             borderRadius: BorderRadius.circular(28),
                           ),
 
                           child: const Icon(
                             Icons.chat_bubble_outline,
+
                             size: 48,
+
                             color: Color(0xFF1565C0),
                           ),
                         ),
 
                         const SizedBox(height: 18),
 
-                        const Text(
-                          'Билдирүүлөр жок',
-                          style: TextStyle(
+                        Text(
+                          t('noMessages'),
+
+                          style: const TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.bold,
                           ),
@@ -318,10 +420,15 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
 
                         const SizedBox(height: 7),
 
-                        const Text(
-                          'Кардарга биринчи жоопту жазыңыз.',
+                        Text(
+                          t('firstReply'),
+
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
+
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -368,7 +475,7 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
                       textInputAction: TextInputAction.newline,
 
                       decoration: InputDecoration(
-                        hintText: 'Кардарга жооп жазыңыз...',
+                        hintText: t('replyHint'),
 
                         hintStyle: const TextStyle(
                           color: Colors.grey,
@@ -424,12 +531,14 @@ class _AdminChatDetailPageState extends State<AdminChatDetailPage> {
                         color: isSending
                             ? Colors.grey
                             : const Color(0xFF1565C0),
+
                         shape: BoxShape.circle,
                       ),
 
                       child: isSending
                           ? const Padding(
                               padding: EdgeInsets.all(15),
+
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
