@@ -22,6 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String currentLanguage = 'ky';
+  int selectedIndex = 0;
 
   final String adminEmail = 'miki@gmail.com';
 
@@ -30,6 +31,10 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _loadLanguage();
   }
+
+  // =========================================================
+  // 🌍 LANGUAGE
+  // =========================================================
 
   Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
@@ -50,70 +55,84 @@ class _HomePageState extends State<HomePage> {
   String homeText(String key) {
     const texts = {
       'ky': {
-        'serviceDescription':
-            'Кыргызстан менен Кореянын ортосундагы жеткирүү кызматы',
-        'chooseDirection': '📦 Жеткирүү багытын тандаңыз',
-        'services': '🛍️ Кызматтар',
+        'marketplace': 'Marketplace',
+        'orders': 'Менин заказдарым',
+        'delivery': 'Жеткирүү',
+        'chat': 'Chat',
+        'profile': 'Профиль',
+        'admin': 'Admin Panel',
+        'kgToKr': 'Кыргызстан → Корея',
         'kgToKrSubtitle': 'Кыргызстандан Кореяга заказ жөнөтүү',
+        'krToKg': 'Корея → Кыргызстан',
         'krToKgSubtitle': 'Кореядан Кыргызстанга заказ жөнөтүү',
-        'myOrdersSubtitle': 'Бардык заказдарыңызды көрүү',
-        'marketplaceSubtitle': 'Товарларды сатып алуу жана сатуу',
-        'chatTitle': 'Админ менен чат',
-        'chatSubtitle': 'Суроолор боюнча биз менен байланышыңыз',
-        'profileSubtitle': 'Жеке маалыматтарды башкаруу',
-        'adminSubtitle': 'Заказдарды жана кардарларды башкаруу',
-        'logoutTooltip': 'Чыгуу',
+        'chooseDirection': 'Жеткирүү багытын тандаңыз',
         'logout': 'Аккаунттан чыгуу',
+        'logoutTooltip': 'Чыгуу',
+        'deliveryTitle': 'Жеткирүү',
+        'deliverySubtitle': 'Кыргызстан ↔ Корея',
       },
+
       'ru': {
-        'serviceDescription': 'Сервис доставки между Кыргызстаном и Кореей',
-        'chooseDirection': '📦 Выберите направление доставки',
-        'services': '🛍️ Сервисы',
+        'marketplace': 'Marketplace',
+        'orders': 'Мои заказы',
+        'delivery': 'Доставка',
+        'chat': 'Чат',
+        'profile': 'Профиль',
+        'admin': 'Admin Panel',
+        'kgToKr': 'Кыргызстан → Корея',
         'kgToKrSubtitle': 'Отправить заказ из Кыргызстана в Корею',
+        'krToKg': 'Корея → Кыргызстан',
         'krToKgSubtitle': 'Отправить заказ из Кореи в Кыргызстан',
-        'myOrdersSubtitle': 'Просмотреть все ваши заказы',
-        'marketplaceSubtitle': 'Покупка и продажа товаров',
-        'chatTitle': 'Чат с администратором',
-        'chatSubtitle': 'Свяжитесь с нами по вопросам',
-        'profileSubtitle': 'Управление личными данными',
-        'adminSubtitle': 'Управление заказами и клиентами',
-        'logoutTooltip': 'Выйти',
+        'chooseDirection': 'Выберите направление доставки',
         'logout': 'Выйти из аккаунта',
+        'logoutTooltip': 'Выйти',
+        'deliveryTitle': 'Доставка',
+        'deliverySubtitle': 'Кыргызстан ↔ Корея',
       },
+
       'en': {
-        'serviceDescription': 'Delivery service between Kyrgyzstan and Korea',
-        'chooseDirection': '📦 Choose delivery direction',
-        'services': '🛍️ Services',
+        'marketplace': 'Marketplace',
+        'orders': 'My Orders',
+        'delivery': 'Delivery',
+        'chat': 'Chat',
+        'profile': 'Profile',
+        'admin': 'Admin Panel',
+        'kgToKr': 'Kyrgyzstan → Korea',
         'kgToKrSubtitle': 'Send an order from Kyrgyzstan to Korea',
+        'krToKg': 'Korea → Kyrgyzstan',
         'krToKgSubtitle': 'Send an order from Korea to Kyrgyzstan',
-        'myOrdersSubtitle': 'View all your orders',
-        'marketplaceSubtitle': 'Buy and sell products',
-        'chatTitle': 'Chat with admin',
-        'chatSubtitle': 'Contact us if you have any questions',
-        'profileSubtitle': 'Manage your personal information',
-        'adminSubtitle': 'Manage orders and customers',
+        'chooseDirection': 'Choose delivery direction',
+        'logout': 'Log out',
         'logoutTooltip': 'Log out',
-        'logout': 'Log out of account',
+        'deliveryTitle': 'Delivery',
+        'deliverySubtitle': 'Kyrgyzstan ↔ Korea',
       },
+
       'ko': {
-        'serviceDescription': '키르기스스탄과 한국 간 배송 서비스',
-        'chooseDirection': '📦 배송 방향을 선택하세요',
-        'services': '🛍️ 서비스',
+        'marketplace': 'Marketplace',
+        'orders': '내 주문',
+        'delivery': '배송',
+        'chat': '채팅',
+        'profile': '프로필',
+        'admin': '관리자 패널',
+        'kgToKr': '키르기스스탄 → 한국',
         'kgToKrSubtitle': '키르기스스탄에서 한국으로 주문 보내기',
+        'krToKg': '한국 → 키르기스스탄',
         'krToKgSubtitle': '한국에서 키르기스스탄으로 주문 보내기',
-        'myOrdersSubtitle': '모든 주문 보기',
-        'marketplaceSubtitle': '상품 구매 및 판매',
-        'chatTitle': '관리자와 채팅',
-        'chatSubtitle': '문의사항이 있으면 연락해주세요',
-        'profileSubtitle': '개인정보 관리',
-        'adminSubtitle': '주문 및 고객 관리',
+        'chooseDirection': '배송 방향을 선택하세요',
+        'logout': '로그아웃',
         'logoutTooltip': '로그아웃',
-        'logout': '계정에서 로그아웃',
+        'deliveryTitle': '배송',
+        'deliverySubtitle': '키르기스스탄 ↔ 한국',
       },
     };
 
     return texts[currentLanguage]?[key] ?? texts['ky']?[key] ?? key;
   }
+
+  // =========================================================
+  // 🚪 LOGOUT
+  // =========================================================
 
   Future<void> logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
@@ -127,10 +146,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+  // =========================================================
+  // 📱 NAVIGATION PAGES
+  // =========================================================
 
+  Widget _buildPage(int index, User? user) {
+    switch (index) {
+      case 0:
+        // 🛍️ Marketplace — БИРИНЧИ БЕТ
+        return const MarketplacePage();
+
+      case 1:
+        // 📦 Менин заказдарым
+        return const MyOrdersPage();
+
+      case 2:
+        // 🚚 Жеткирүү
+        return _buildDeliveryPage();
+
+      case 3:
+        // 💬 Chat же 👨‍💼 Admin
+        if (user?.email == adminEmail) {
+          return const AdminPanelPage();
+        }
+
+        return const ChatPage();
+
+      case 4:
+        // 👤 Profile
+        return const ProfilePage();
+
+      default:
+        return const MarketplacePage();
+    }
+  }
+
+  // =========================================================
+  // 🚚 DELIVERY PAGE
+  // =========================================================
+
+  Widget _buildDeliveryPage() {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
 
@@ -139,285 +194,156 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
 
-        title: const Text(
-          'KG ↔️ KOREA',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          homeText('deliveryTitle'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-
-        actions: [
-          IconButton(
-            onPressed: () => logout(context),
-            icon: const Icon(Icons.logout),
-            tooltip: homeText('logoutTooltip'),
-          ),
-        ],
       ),
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
 
-            children: [
-              // 👋 Саламдашуу
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(22),
+          children: [
+            // =================================================
+            // HEADER
+            // =================================================
+            Container(
+              width: double.infinity,
 
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              padding: const EdgeInsets.all(22),
+
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
+
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+
+                borderRadius: BorderRadius.circular(24),
+              ),
+
+              child: Row(
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+
+                    child: const Center(
+                      child: Text('🚚', style: TextStyle(fontSize: 30)),
+                    ),
                   ),
 
-                  borderRadius: BorderRadius.circular(24),
-                ),
+                  const SizedBox(width: 15),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
 
-                  children: [
-                    const CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Colors.white,
+                      children: [
+                        Text(
+                          homeText('deliveryTitle'),
 
-                      child: Icon(
-                        Icons.local_shipping,
-                        size: 32,
-                        color: Color(0xFF1565C0),
-                      ),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 23,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Text(
+                          homeText('deliverySubtitle'),
+
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
-
-                    const SizedBox(height: 18),
-
-                    const Text(
-                      'KG ↔️ KOREA',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Text(
-                      user?.email ?? '',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Text(
-                      homeText('serviceDescription'),
-                      style: const TextStyle(color: Colors.white, fontSize: 15),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              Text(
-                homeText('chooseDirection'),
-                style: const TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              // 🇰🇬 → 🇰🇷
-              _directionCard(
-                context: context,
-                flag: '🇰🇬',
-                secondFlag: '🇰🇷',
-                title: t('kyrgyzstanKorea'),
-                subtitle: homeText('kgToKrSubtitle'),
-                color: const Color(0xFFE3F2FD),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CreateOrderPage(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // 🇰🇷 → 🇰🇬
-              _directionCard(
-                context: context,
-                flag: '🇰🇷',
-                secondFlag: '🇰🇬',
-                title: t('koreaKyrgyzstan'),
-                subtitle: homeText('krToKgSubtitle'),
-                color: const Color(0xFFE8F5E9),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const KoreaToKyrgyzstanPage(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 28),
-
-              Text(
-                homeText('services'),
-                style: const TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              // 📦 Менин заказдарым
-              _menuCard(
-                context: context,
-                icon: Icons.inventory_2,
-                title: t('orders'),
-                subtitle: homeText('myOrdersSubtitle'),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyOrdersPage(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // 🛍️ Marketplace
-              _menuCard(
-                context: context,
-                icon: Icons.storefront,
-                title: t('marketplace'),
-                subtitle: homeText('marketplaceSubtitle'),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MarketplacePage(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // 💬 Chat
-              _menuCard(
-                context: context,
-                icon: Icons.chat_bubble_outline,
-                title: homeText('chatTitle'),
-                subtitle: homeText('chatSubtitle'),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ChatPage()),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // 👤 Profile
-              _menuCard(
-                context: context,
-                icon: Icons.person_outline,
-                title: t('profile'),
-                subtitle: homeText('profileSubtitle'),
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfilePage(),
-                    ),
-                  );
-                },
-              ),
-
-              // 👨‍💼 Admin
-              if (user?.email == adminEmail) ...[
-                const SizedBox(height: 12),
-
-                _menuCard(
-                  context: context,
-                  icon: Icons.admin_panel_settings,
-                  title: t('adminPanel'),
-                  subtitle: homeText('adminSubtitle'),
-
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminPanelPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-
-              const SizedBox(height: 25),
-
-              // 🚪 Чыгуу
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-
-                child: OutlinedButton.icon(
-                  onPressed: () => logout(context),
-
-                  icon: const Icon(Icons.logout),
-
-                  label: Text(
-                    homeText('logout'),
-                    style: const TextStyle(fontSize: 16),
                   ),
-                ),
+                ],
               ),
+            ),
 
-              const SizedBox(height: 15),
+            const SizedBox(height: 28),
 
-              const Center(
-                child: Text(
-                  'KG ↔️ KOREA Delivery',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ),
+            Text(
+              homeText('chooseDirection'),
 
-              const SizedBox(height: 10),
-            ],
-          ),
+              style: const TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 15),
+
+            // =================================================
+            // 🇰🇬 → 🇰🇷
+            // =================================================
+            _directionCard(
+              flag: '🇰🇬',
+              secondFlag: '🇰🇷',
+
+              title: homeText('kgToKr'),
+
+              subtitle: homeText('kgToKrSubtitle'),
+
+              color: const Color(0xFFE3F2FD),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateOrderPage(),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 14),
+
+            // =================================================
+            // 🇰🇷 → 🇰🇬
+            // =================================================
+            _directionCard(
+              flag: '🇰🇷',
+              secondFlag: '🇰🇬',
+
+              title: homeText('krToKg'),
+
+              subtitle: homeText('krToKgSubtitle'),
+
+              color: const Color(0xFFE8F5E9),
+
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const KoreaToKyrgyzstanPage(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // 📦 Багыт карточкасы
-  static Widget _directionCard({
-    required BuildContext context,
+  // =========================================================
+  // 📦 DIRECTION CARD
+  // =========================================================
+
+  Widget _directionCard({
     required String flag,
     required String secondFlag,
     required String title,
@@ -427,10 +353,12 @@ class _HomePageState extends State<HomePage> {
   }) {
     return Material(
       color: color,
+
       borderRadius: BorderRadius.circular(20),
 
       child: InkWell(
         onTap: onTap,
+
         borderRadius: BorderRadius.circular(20),
 
         child: Padding(
@@ -444,12 +372,14 @@ class _HomePageState extends State<HomePage> {
 
                 decoration: BoxDecoration(
                   color: Colors.white,
+
                   borderRadius: BorderRadius.circular(16),
                 ),
 
                 child: Center(
                   child: Text(
                     '$flag $secondFlag',
+
                     style: const TextStyle(fontSize: 23),
                   ),
                 ),
@@ -464,6 +394,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text(
                       title,
+
                       style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -474,6 +405,7 @@ class _HomePageState extends State<HomePage> {
 
                     Text(
                       subtitle,
+
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade700,
@@ -491,71 +423,186 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // 🛍️ Меню карточкасы
-  static Widget _menuCard({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
+  // =========================================================
+  // 🧭 BOTTOM NAVIGATION
+  // =========================================================
 
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+  Widget _buildBottomNavigation(User? user) {
+    final isAdmin = user?.email == adminEmail;
 
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
 
-        child: Padding(
-          padding: const EdgeInsets.all(17),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+
+            blurRadius: 18,
+
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+
+      child: SafeArea(
+        top: false,
+
+        child: SizedBox(
+          height: 72,
 
           child: Row(
             children: [
-              Container(
-                width: 50,
-                height: 50,
-
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE3F2FD),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-
-                child: Icon(icon, color: const Color(0xFF1565C0), size: 27),
+              // 🛍️ MARKETPLACE
+              _navItem(
+                index: 0,
+                icon: Icons.storefront_outlined,
+                activeIcon: Icons.storefront,
+                label: homeText('marketplace'),
               ),
 
-              const SizedBox(width: 15),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      subtitle,
-                      style: const TextStyle(fontSize: 13, color: Colors.grey),
-                    ),
-                  ],
-                ),
+              // 📦 ORDERS
+              _navItem(
+                index: 1,
+                icon: Icons.inventory_2_outlined,
+                activeIcon: Icons.inventory_2,
+                label: homeText('orders'),
               ),
 
-              const Icon(Icons.chevron_right, color: Colors.grey),
+              // 🚚 DELIVERY
+              _navItem(
+                index: 2,
+                icon: Icons.local_shipping_outlined,
+                activeIcon: Icons.local_shipping,
+                label: homeText('delivery'),
+              ),
+
+              // 💬 CHAT / ADMIN
+              _navItem(
+                index: 3,
+
+                icon: isAdmin
+                    ? Icons.admin_panel_settings_outlined
+                    : Icons.chat_bubble_outline,
+
+                activeIcon: isAdmin
+                    ? Icons.admin_panel_settings
+                    : Icons.chat_bubble,
+
+                label: isAdmin ? homeText('admin') : homeText('chat'),
+              ),
+
+              // 👤 PROFILE
+              _navItem(
+                index: 4,
+                icon: Icons.person_outline,
+                activeIcon: Icons.person,
+                label: homeText('profile'),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  // =========================================================
+  // 🧩 NAV ITEM
+  // =========================================================
+
+  Widget _navItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+  }) {
+    final selected = selectedIndex == index;
+
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+
+        onTap: () {
+          setState(() {
+            selectedIndex = index;
+          });
+        },
+
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+
+              decoration: BoxDecoration(
+                color: selected ? const Color(0xFFE3F2FD) : Colors.transparent,
+
+                borderRadius: BorderRadius.circular(18),
+              ),
+
+              child: Icon(
+                selected ? activeIcon : icon,
+
+                size: 25,
+
+                color: selected
+                    ? const Color(0xFF1565C0)
+                    : Colors.grey.shade600,
+              ),
+            ),
+
+            const SizedBox(height: 2),
+
+            Text(
+              label,
+
+              maxLines: 1,
+
+              overflow: TextOverflow.ellipsis,
+
+              style: TextStyle(
+                fontSize: 10,
+
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+
+                color: selected
+                    ? const Color(0xFF1565C0)
+                    : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================
+  // 🏠 BUILD
+  // =========================================================
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
+
+      body: IndexedStack(
+        index: selectedIndex,
+
+        children: [
+          _buildPage(0, user),
+          _buildPage(1, user),
+          _buildPage(2, user),
+          _buildPage(3, user),
+          _buildPage(4, user),
+        ],
+      ),
+
+      bottomNavigationBar: _buildBottomNavigation(user),
     );
   }
 }
