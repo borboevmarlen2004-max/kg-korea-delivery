@@ -20,14 +20,23 @@ class _MarketplacePageState extends State<MarketplacePage> {
   String searchText = '';
   String currentLanguage = 'ky';
 
+  // Фильтрлер
+  String selectedCategory = 'all';
+  String selectedCountry = 'all';
+
   @override
   void initState() {
     super.initState();
     _loadLanguage();
   }
 
+  // =========================================================
+  // 🌍 LANGUAGE
+  // =========================================================
+
   Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
+
     final language = prefs.getString('language') ?? 'ky';
 
     if (!mounted) return;
@@ -110,6 +119,77 @@ class _MarketplacePageState extends State<MarketplacePage> {
       },
 
       'error': {'ky': 'Ката', 'ru': 'Ошибка', 'en': 'Error', 'ko': '오류'},
+
+      'all': {'ky': 'Баары', 'ru': 'Все', 'en': 'All', 'ko': '전체'},
+
+      'category': {
+        'ky': 'Категория',
+        'ru': 'Категория',
+        'en': 'Category',
+        'ko': '카테고리',
+      },
+
+      'country': {'ky': 'Өлкө', 'ru': 'Страна', 'en': 'Country', 'ko': '국가'},
+
+      'promoted': {
+        'ky': '🔥 Жарнамаланган',
+        'ru': '🔥 Рекламируемые',
+        'en': '🔥 Promoted',
+        'ko': '🔥 추천 상품',
+      },
+
+      'newProducts': {
+        'ky': '🆕 Жаңы товарлар',
+        'ru': '🆕 Новые товары',
+        'en': '🆕 New products',
+        'ko': '🆕 새 상품',
+      },
+
+      'kg': {
+        'ky': '🇰🇬 Кыргызстан',
+        'ru': '🇰🇬 Кыргызстан',
+        'en': '🇰🇬 Kyrgyzstan',
+        'ko': '🇰🇬 키르기스스탄',
+      },
+
+      'kr': {
+        'ky': '🇰🇷 Корея',
+        'ru': '🇰🇷 Корея',
+        'en': '🇰🇷 Korea',
+        'ko': '🇰🇷 한국',
+      },
+
+      'electronics': {
+        'ky': 'Электроника',
+        'ru': 'Электроника',
+        'en': 'Electronics',
+        'ko': '전자제품',
+      },
+
+      'clothes': {'ky': 'Кийим', 'ru': 'Одежда', 'en': 'Clothes', 'ko': '의류'},
+
+      'phones': {
+        'ky': 'Телефон',
+        'ru': 'Телефоны',
+        'en': 'Phones',
+        'ko': '휴대폰',
+      },
+
+      'home': {
+        'ky': 'Үй буюмдары',
+        'ru': 'Для дома',
+        'en': 'Home',
+        'ko': '생활용품',
+      },
+
+      'cosmetics': {
+        'ky': 'Косметика',
+        'ru': 'Косметика',
+        'en': 'Cosmetics',
+        'ko': '화장품',
+      },
+
+      'other': {'ky': 'Башка', 'ru': 'Другое', 'en': 'Other', 'ko': '기타'},
     };
 
     return translations[key]?[currentLanguage] ??
@@ -117,11 +197,88 @@ class _MarketplacePageState extends State<MarketplacePage> {
         key;
   }
 
+  // =========================================================
+  // 🏷️ CATEGORY NAME
+  // =========================================================
+
+  String categoryName(String category) {
+    switch (category) {
+      case 'electronics':
+        return t('electronics');
+
+      case 'clothes':
+        return t('clothes');
+
+      case 'phones':
+        return t('phones');
+
+      case 'home':
+        return t('home');
+
+      case 'cosmetics':
+        return t('cosmetics');
+
+      case 'other':
+        return t('other');
+
+      default:
+        return t('all');
+    }
+  }
+
+  // =========================================================
+  // 💰 PRICE
+  // =========================================================
+
+  String priceText(Map<String, dynamic> data) {
+    final price = data['price']?.toString() ?? '0';
+
+    final currency = data['currency']?.toString().toLowerCase() ?? 'kgs';
+
+    if (currency == 'krw' || currency == 'won' || currency == '₩') {
+      return '₩$price';
+    }
+
+    return '$price сом';
+  }
+
+  // =========================================================
+  // 🌍 COUNTRY
+  // =========================================================
+
+  String countryName(String country) {
+    final value = country.toLowerCase();
+
+    if (value == 'korea' ||
+        value == 'kr' ||
+        value == 'корея' ||
+        value == '한국') {
+      return t('kr');
+    }
+
+    if (value == 'kyrgyzstan' ||
+        value == 'kg' ||
+        value == 'кыргызстан' ||
+        value == 'кыргыз') {
+      return t('kg');
+    }
+
+    return country;
+  }
+
+  // =========================================================
+  // 🧹 DISPOSE
+  // =========================================================
+
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
   }
+
+  // =========================================================
+  // 🏠 BUILD
+  // =========================================================
 
   @override
   Widget build(BuildContext context) {
@@ -142,12 +299,12 @@ class _MarketplacePageState extends State<MarketplacePage> {
       body: Column(
         children: [
           // =================================================
-          // 🔎 ИЗДӨӨ
+          // 🔎 SEARCH
           // =================================================
           Container(
             color: Colors.white,
 
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
 
             child: TextField(
               controller: searchController,
@@ -182,6 +339,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
+
                   borderSide: BorderSide.none,
                 ),
 
@@ -198,7 +356,143 @@ class _MarketplacePageState extends State<MarketplacePage> {
           ),
 
           // =================================================
-          // 📦 ТОВАРЛАР
+          // 🏷️ CATEGORY
+          // =================================================
+          Container(
+            color: Colors.white,
+
+            height: 58,
+
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
+
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+
+              children: [
+                _categoryChip(value: 'all', icon: Icons.apps, label: t('all')),
+
+                _categoryChip(
+                  value: 'phones',
+                  icon: Icons.phone_android,
+                  label: t('phones'),
+                ),
+
+                _categoryChip(
+                  value: 'electronics',
+                  icon: Icons.devices,
+                  label: t('electronics'),
+                ),
+
+                _categoryChip(
+                  value: 'clothes',
+                  icon: Icons.checkroom,
+                  label: t('clothes'),
+                ),
+
+                _categoryChip(
+                  value: 'home',
+                  icon: Icons.home_outlined,
+                  label: t('home'),
+                ),
+
+                _categoryChip(
+                  value: 'cosmetics',
+                  icon: Icons.face,
+                  label: t('cosmetics'),
+                ),
+
+                _categoryChip(
+                  value: 'other',
+                  icon: Icons.more_horiz,
+                  label: t('other'),
+                ),
+              ],
+            ),
+          ),
+
+          // =================================================
+          // 🌍 COUNTRY FILTER
+          // =================================================
+          Container(
+            color: Colors.white,
+
+            height: 55,
+
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+
+            child: Row(
+              children: [
+                Expanded(
+                  child: _countryButton(
+                    value: 'all',
+                    label: t('all'),
+                    icon: Icons.public,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                Expanded(
+                  child: _countryButton(
+                    value: 'kg',
+                    label: t('kg'),
+                    icon: Icons.flag_outlined,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                Expanded(
+                  child: _countryButton(
+                    value: 'kr',
+                    label: t('kr'),
+                    icon: Icons.flag_outlined,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // =================================================
+          // 🔥 / 🆕 FILTER INFO
+          // =================================================
+          Container(
+            color: Colors.white,
+
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.local_fire_department,
+                  color: Colors.orange,
+                  size: 20,
+                ),
+
+                const SizedBox(width: 7),
+
+                Text(
+                  t('promoted'),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const Spacer(),
+
+                Text(
+                  t('newProducts'),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+
+          // =================================================
+          // 📦 FIRESTORE PRODUCTS
           // =================================================
           Expanded(
             child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -227,14 +521,20 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                 final allProducts = snapshot.data?.docs ?? [];
 
-                // 🛒 Сатылбаган товарлар
+                // =================================================
+                // 🛒 САТЫЛБАГАН ТОВАРЛАР
+                // =================================================
+
                 final availableProducts = allProducts.where((product) {
                   final data = product.data();
 
                   return data['sold'] != true;
                 }).toList();
 
-                // 🔎 Издөө
+                // =================================================
+                // 🔎 SEARCH + CATEGORY + COUNTRY
+                // =================================================
+
                 final products = availableProducts.where((product) {
                   final data = product.data();
 
@@ -246,9 +546,45 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   final sellerEmail =
                       data['sellerEmail']?.toString().toLowerCase() ?? '';
 
-                  return title.contains(searchText) ||
+                  final category =
+                      data['category']?.toString().toLowerCase() ?? '';
+
+                  final country =
+                      data['country']?.toString().toLowerCase() ?? '';
+
+                  // 🔎 Search
+                  final matchesSearch =
+                      searchText.isEmpty ||
+                      title.contains(searchText) ||
                       description.contains(searchText) ||
                       sellerEmail.contains(searchText);
+
+                  // 🏷️ Category
+                  final matchesCategory =
+                      selectedCategory == 'all' || category == selectedCategory;
+
+                  // 🌍 Country
+                  bool matchesCountry = true;
+
+                  if (selectedCountry != 'all') {
+                    if (selectedCountry == 'kg') {
+                      matchesCountry =
+                          country == 'kg' ||
+                          country == 'kyrgyzstan' ||
+                          country == 'кыргызстан' ||
+                          country == 'кыргыз';
+                    }
+
+                    if (selectedCountry == 'kr') {
+                      matchesCountry =
+                          country == 'kr' ||
+                          country == 'korea' ||
+                          country == 'корея' ||
+                          country == '한국';
+                    }
+                  }
+
+                  return matchesSearch && matchesCategory && matchesCountry;
                 }).toList();
 
                 if (products.isEmpty) {
@@ -269,13 +605,19 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                     final title = data['title']?.toString() ?? t('noName');
 
-                    final price = data['price']?.toString() ?? '0';
-
                     final description = data['description']?.toString() ?? '';
 
                     final sellerEmail = data['sellerEmail']?.toString() ?? '';
 
                     final imageBase64 = data['imageBase64']?.toString() ?? '';
+
+                    final price = priceText(data);
+
+                    final country = data['country']?.toString() ?? '';
+
+                    final category = data['category']?.toString() ?? '';
+
+                    final promoted = data['isPromoted'] == true;
 
                     return _productCard(
                       context: context,
@@ -285,6 +627,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
                       description: description,
                       sellerEmail: sellerEmail,
                       imageBase64: imageBase64,
+                      country: country,
+                      category: category,
+                      promoted: promoted,
                     );
                   },
                 );
@@ -294,7 +639,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
         ],
       ),
 
-      // ➕ Товар кошуу
+      // =====================================================
+      // ➕ ADD PRODUCT
+      // =====================================================
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF1565C0),
 
@@ -318,7 +665,119 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 
   // =========================================================
-  // 🔎 ТОВАР ТАБЫЛГАН ЖОК
+  // 🏷️ CATEGORY CHIP
+  // =========================================================
+
+  Widget _categoryChip({
+    required String value,
+    required IconData icon,
+    required String label,
+  }) {
+    final selected = selectedCategory == value;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+
+      child: ChoiceChip(
+        selected: selected,
+
+        onSelected: (_) {
+          setState(() {
+            selectedCategory = value;
+          });
+        },
+
+        avatar: Icon(
+          icon,
+          size: 18,
+          color: selected ? Colors.white : const Color(0xFF1565C0),
+        ),
+
+        label: Text(label),
+
+        selectedColor: const Color(0xFF1565C0),
+
+        backgroundColor: const Color(0xFFF5F7FA),
+
+        labelStyle: TextStyle(
+          color: selected ? Colors.white : Colors.black87,
+
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        ),
+
+        side: BorderSide(
+          color: selected ? const Color(0xFF1565C0) : Colors.transparent,
+        ),
+      ),
+    );
+  }
+
+  // =========================================================
+  // 🌍 COUNTRY BUTTON
+  // =========================================================
+
+  Widget _countryButton({
+    required String value,
+    required String label,
+    required IconData icon,
+  }) {
+    final selected = selectedCountry == value;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+
+      onTap: () {
+        setState(() {
+          selectedCountry = value;
+        });
+      },
+
+      child: Container(
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFE3F2FD) : const Color(0xFFF5F7FA),
+
+          borderRadius: BorderRadius.circular(14),
+
+          border: Border.all(
+            color: selected ? const Color(0xFF1565C0) : Colors.transparent,
+          ),
+        ),
+
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+
+          children: [
+            Icon(
+              icon,
+              size: 17,
+              color: selected ? const Color(0xFF1565C0) : Colors.grey,
+            ),
+
+            const SizedBox(width: 5),
+
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+
+                style: TextStyle(
+                  fontSize: 12,
+
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+
+                  color: selected ? const Color(0xFF1565C0) : Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================
+  // 🔎 EMPTY
   // =========================================================
 
   Widget _emptySearch() {
@@ -336,6 +795,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
               decoration: BoxDecoration(
                 color: const Color(0xFFE3F2FD),
+
                 borderRadius: BorderRadius.circular(25),
               ),
 
@@ -374,7 +834,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 
   // =========================================================
-  // 🛍️ ТОВАР КАРТОЧКАСЫ
+  // 🛍️ PRODUCT CARD
   // =========================================================
 
   Widget _productCard({
@@ -385,6 +845,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
     required String description,
     required String sellerEmail,
     required String imageBase64,
+    required String country,
+    required String category,
+    required bool promoted,
   }) {
     return Card(
       elevation: 0,
@@ -417,27 +880,75 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
           children: [
             // =================================================
-            // 📸 СҮРӨТ
+            // 📸 IMAGE
             // =================================================
-            SizedBox(
-              width: double.infinity,
-              height: 210,
+            Stack(
+              children: [
+                SizedBox(
+                  width: double.infinity,
 
-              child: imageBase64.isNotEmpty
-                  ? Image.memory(
-                      base64Decode(imageBase64),
+                  height: 210,
 
-                      fit: BoxFit.cover,
+                  child: imageBase64.isNotEmpty
+                      ? Image.memory(
+                          base64Decode(imageBase64),
 
-                      errorBuilder: (context, error, stackTrace) {
-                        return _imagePlaceholder();
-                      },
-                    )
-                  : _imagePlaceholder(),
+                          fit: BoxFit.cover,
+
+                          errorBuilder: (context, error, stackTrace) {
+                            return _imagePlaceholder();
+                          },
+                        )
+                      : _imagePlaceholder(),
+                ),
+
+                // 🔥 PROMOTED
+                if (promoted)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+
+                        children: [
+                          Icon(
+                            Icons.local_fire_department,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+
+                          SizedBox(width: 4),
+
+                          Text(
+                            'PROMOTED',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             // =================================================
-            // 📦 МААЛЫМАТ
+            // 📦 INFORMATION
             // =================================================
             Padding(
               padding: const EdgeInsets.all(17),
@@ -461,10 +972,11 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                   const SizedBox(height: 8),
 
+                  // 💰 PRICE
                   Row(
                     children: [
                       Text(
-                        '$price сом',
+                        price,
 
                         style: const TextStyle(
                           fontSize: 21,
@@ -502,7 +1014,29 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                   const SizedBox(height: 10),
 
-                  if (description.isNotEmpty)
+                  // 🌍 COUNTRY + CATEGORY
+                  Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+
+                    children: [
+                      if (country.isNotEmpty)
+                        _infoTag(
+                          icon: Icons.location_on_outlined,
+                          text: countryName(country),
+                        ),
+
+                      if (category.isNotEmpty)
+                        _infoTag(
+                          icon: Icons.category_outlined,
+                          text: categoryName(category),
+                        ),
+                    ],
+                  ),
+
+                  if (description.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+
                     Text(
                       description,
 
@@ -516,6 +1050,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
                         height: 1.4,
                       ),
                     ),
+                  ],
 
                   const SizedBox(height: 12),
 
@@ -523,6 +1058,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
 
                   const SizedBox(height: 12),
 
+                  // =================================================
+                  // 👤 SELLER
+                  // =================================================
                   Row(
                     children: [
                       Container(
@@ -591,7 +1129,39 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 
   // =========================================================
-  // 📸 СҮРӨТ ЖОК БОЛСО
+  // 🏷️ INFO TAG
+  // =========================================================
+
+  Widget _infoTag({required IconData icon, required String text}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F7FA),
+
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+
+        children: [
+          Icon(icon, size: 15, color: const Color(0xFF1565C0)),
+
+          const SizedBox(width: 4),
+
+          Text(
+            text,
+
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================
+  // 📸 IMAGE PLACEHOLDER
   // =========================================================
 
   Widget _imagePlaceholder() {
